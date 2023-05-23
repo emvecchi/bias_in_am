@@ -1,14 +1,3 @@
-import researchpy as rp
-import statsmodels.api as sm
-import statsmodels.formula.api as smf
-import scipy.stats as stats
-from sklearn.feature_selection import chi2
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.feature_selection import f_regression
-
-
-
 def get_variable_importance(df, dep_variable, ind_variables):
 	y = df[dep_variable]
 	X = df[ind_variables]
@@ -61,9 +50,22 @@ def get_mixed_effects_regression(df, dep_variable, ind_variables, random_variabl
 	result = model.fit()
 	return(result)
 
+if __name__ == '__main__':
+	import sys
+	from pandas import read_csv
+	import researchpy as rp
+	import statsmodels.api as sm
+	import statsmodels.formula.api as smf
+	import scipy.stats as stats
+	from sklearn.feature_selection import chi2
+	from sklearn.ensemble import RandomForestClassifier
+	from sklearn.linear_model import LogisticRegression
+	from sklearn.feature_selection import f_regression
+	
+	datafile = args = sys.argv[1:]
+	df = pd.read_csv(datafile, sep="\t", lineterminator="\n")
 
-
-## Example uses for each def:
-# chi2_info = get_variable_importance(data, 'gender', ['likes','ups','score'])
-# model, regression_info = get_log_regression(data, 'gender', ['likes','ups','score'])
-# mixed_effects_info = get_mixed_effects_regression(data, 'gender', ['likes','ups','score'], 'OP_id', 'author')
+	## Example uses for each def:
+	# chi2_info = get_variable_importance(data, 'gender', ['likes','ups','score'])
+	# model, regression_info = get_log_regression(data, 'gender', ['likes','ups','score'])
+	# mixed_effects_info = get_mixed_effects_regression(data, 'gender', ['likes','ups','score'], 'OP_id', 'author')
