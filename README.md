@@ -8,6 +8,6 @@
 * numpy 1.23.4
 * pandas 1.5.1
 * transformers 4.24.0
-* tqdm 4.64.1
-* xlrd 2.0.1
-* openpyxl 3.0.10
+* sklearn
+* statsmodels
+* 
