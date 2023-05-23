@@ -61,11 +61,13 @@ if __name__ == '__main__':
 	from sklearn.ensemble import RandomForestClassifier
 	from sklearn.linear_model import LogisticRegression
 	from sklearn.feature_selection import f_regression
-	
-	datafile = args = sys.argv[1:]
-	df = pd.read_csv(datafile, sep="\t", lineterminator="\n")
 
+	datafile = sys.argv[1]
+	df = pd.read_csv(datafile, sep="\t", lineterminator="\n")
+	
+	# NOTE: df['gender'] needs to be [0,1]
+	
 	## Example uses for each def:
-	# chi2_info = get_variable_importance(data, 'gender', ['likes','ups','score'])
-	# model, regression_info = get_log_regression(data, 'gender', ['likes','ups','score'])
-	# mixed_effects_info = get_mixed_effects_regression(data, 'gender', ['likes','ups','score'], 'OP_id', 'author')
+	# chi2_info = get_variable_importance(df, 'gender', ['likes','ups','score'])
+	# model, regression_info = get_log_regression(df, 'gender', ['likes','ups','score'])
+	# mixed_effects_info = get_mixed_effects_regression(df, 'gender', ['likes','ups','score'], 'OP_id', 'author')
