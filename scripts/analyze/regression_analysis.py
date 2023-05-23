@@ -15,8 +15,6 @@ def get_variable_importance(df, dep_variable, ind_variables):
 		})
 	return(results)
 
-
-
 def get_log_regression(df, dep_variable, ind_variables):
 	y = df[dep_variable]
 	X = df[ind_variables]
@@ -36,9 +34,6 @@ def get_log_regression(df, dep_variable, ind_variables):
 		})
 	return(m, results)
 
-
-
-
 def get_mixed_effects_regression(df, dep_variable, ind_variables, random_variable, group_by):
 	formula = dep_variable + ' ~ ' + ind_variables[0]
 	x = 1
@@ -49,6 +44,8 @@ def get_mixed_effects_regression(df, dep_variable, ind_variables, random_variabl
 	model = smf.mixedlm(formula, data=df, groups = df[group_by])
 	result = model.fit()
 	return(result)
+
+
 
 if __name__ == '__main__':
 	import sys
