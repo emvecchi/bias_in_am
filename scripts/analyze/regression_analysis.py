@@ -15,6 +15,26 @@ def get_variable_importance(df, dep_variable, ind_variables):
 		})
 	return(results)
 
+
+def get_ols_analysis(df, dep_variable, ind_variables1, ind_variables2):
+	formula1 = dep_variable + ' ~ ' + ind_variables1[0]
+	x = 1
+	while x in range(len(ind_variables1)):
+		formula1 += ' + ' + ind_variables1[x]
+		x +=1
+	model1 = ols(formula1, data=df).fit()
+	formula2 = dep_variable + ' ~ ' + ind_variables2[0]
+	x = 1
+	while x in range(len(ind_variables2)):
+		formula2 += ' + ' + ind_variables2[x]
+		x +=1
+	model2 = ols(formula2, data=df).fit()
+	print(model1.summary())
+	print(model2.summary())
+	anova_table = sm.stats.anova_lm(model1, model2)
+	print(anova_table)
+
+
 def get_log_regression(df, dep_variable, ind_variables):
 	y = df[dep_variable]
 	X = df[ind_variables]
@@ -34,6 +54,7 @@ def get_log_regression(df, dep_variable, ind_variables):
 		})
 	return(m, results)
 
+
 def get_mixed_effects_regression(df, dep_variable, ind_variables, random_variable, group_by):
 	formula = dep_variable + ' ~ ' + ind_variables[0]
 	x = 1
@@ -47,10 +68,20 @@ def get_mixed_effects_regression(df, dep_variable, ind_variables, random_variabl
 
 
 
+
+#data = pd.DataFrame({
+#	'gender': [1, 0, 1, 0],
+#	'likes': [5, 2, 13, 4],
+#	'score': [0.87, 0.42, 0.77, 0.23],
+#	'ups': [17, 8, 23, 2],
+#	'OP_id': [12322, 42312, 12322, 72994] 
+#	})
+
+
 if __name__ == '__main__':
 	import sys
-	from pandas import read_csv
 	import pandas as pd
+	from pandas import read_csv
 	import researchpy as rp
 	import statsmodels.api as sm
 	import statsmodels.formula.api as smf
@@ -59,6 +90,8 @@ if __name__ == '__main__':
 	from sklearn.ensemble import RandomForestClassifier
 	from sklearn.linear_model import LogisticRegression
 	from sklearn.feature_selection import f_regression
+	from statsmodels.formula.api import ols
+
 
 	datafile = sys.argv[1]
 	df = pd.read_csv(datafile, sep="\t", lineterminator="\n")
