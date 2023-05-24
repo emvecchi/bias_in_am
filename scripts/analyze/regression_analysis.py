@@ -66,18 +66,6 @@ def get_mixed_effects_regression(df, dep_variable, ind_variables, random_variabl
 	result = model.fit()
 	return(result)
 
-
-
-
-#data = pd.DataFrame({
-#	'gender': [1, 0, 1, 0],
-#	'likes': [5, 2, 13, 4],
-#	'score': [0.87, 0.42, 0.77, 0.23],
-#	'ups': [17, 8, 23, 2],
-#	'OP_id': [12322, 42312, 12322, 72994] 
-#	})
-
-
 if __name__ == '__main__':
 	import sys
 	import pandas as pd
@@ -98,6 +86,15 @@ if __name__ == '__main__':
 	
 	# NOTE: df['gender'] needs to be [0,1]
 	
+	# Sample data
+	#data = pd.DataFrame({
+	#	'gender': [1, 0, 1, 0, 1, 1, 0, 1, 0],
+	#	'likes': [5, 2, 13, 4, 23, 24, 8, 9, 3],
+	#	'score': [0.87, 0.42, 0.77, 0.23, 0.52, 0.60, 0.40, 0.48, 0.19],
+	#	'ups': [17, 8, 23, 2, 10, 9, 3, 12, 1],
+	#	'OP_id': [12322, 42312, 12322, 72994, 72994, 138284, 298820, 798920, 304091] 
+	#	})
+
 	## Example uses for each def:
 	# chi2_info = get_variable_importance(df, 'gender', ['likes','ups','score'])
 	# model, regression_info = get_log_regression(df, 'gender', ['likes','ups','score'])
