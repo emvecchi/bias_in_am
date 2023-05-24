@@ -50,6 +50,7 @@ def get_mixed_effects_regression(df, dep_variable, ind_variables, random_variabl
 if __name__ == '__main__':
 	import sys
 	from pandas import read_csv
+	import pandas as pd
 	import researchpy as rp
 	import statsmodels.api as sm
 	import statsmodels.formula.api as smf
