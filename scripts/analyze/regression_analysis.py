@@ -67,4 +67,4 @@ if __name__ == '__main__':
 	## Example uses for each def:
 	# chi2_info = get_variable_importance(df, 'gender', ['likes','ups','score'])
 	# model, regression_info = get_log_regression(df, 'gender', ['likes','ups','score'])
-	# mixed_effects_info = get_mixed_effects_regression(df, 'gender', ['likes','ups','score'], 'OP_id', 'author')
+	# mixed_effects_info = get_mixed_effects_regression(df, 'gender', ['likes','ups','score'], 'OP_id', 'OP_id')
