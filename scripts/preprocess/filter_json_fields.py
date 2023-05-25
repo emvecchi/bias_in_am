@@ -1,5 +1,22 @@
 import json
 
+def cleanCMV(cmv):
+    cmvKeys = ['id', 'author', "author_flair_text",
+                   'title', 
+                   'likes',  
+                   'clicked', 
+                   'score', 
+                   'downs', 
+                   'ups', 
+                   'num_comments', 
+                   'visited' ]
+
+    newCmv = { }
+    for key in cmvKeys:
+        newCmv[key] = cmv[key]
+
+    return newCmv
+
 if __name__ == '__main__':
     import os, sys
 

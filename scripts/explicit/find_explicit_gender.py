@@ -1,76 +1,78 @@
 import json, bz2
-#import spacy
+import spacy
+import string
 
-def filterIDs(inFile, idsFile, outFile):
-    threadIds = set([ line.split('"')[1] for line in open(idsFile, "r") ])
+NLP = spacy.load("en_core_web_sm")
+SEP = "##"
+
+def clearText(text):
+    result = [ ]
+    for word in text.lower().split():
+        word = "".join([c for c in word if c in string.ascii_lowercase])
+        result.append(word)
+
+    result = " ".join(result)
+    return " ".join(result.split())
+        
+def filterGenderSentences(inFile, genders, out):
     
-    found = 0
     for line in inFile:
         cmv = json.loads(line)
+    
+        for text in cmv["selftext"].split("\n"):
+            doc = NLP(text)
+            for sentence in doc.sents:
+                lemmas = [ token.lemma_ for token in sentence ]
+                if "I" not in lemmas:
+                    continue
 
-        if cmv["id"] in threadIds:
-            json.dump(cmv, outFile)
-            outFile.write("\n")
-            found += 1
-            outFile.flush()
+                text = str(sentence)
+                allText = "##" + "##".join(text.lower().split() + clearText(text).split()) + "##"
+                    
+                gSentence = False
+                foundG = None
+                for g in genders:
+                    if "##" + g + "##" in allText:
+                        foundG = g
+                        gSentence = True
+                        break
+
+                if not gSentence:
+                    for lemma in lemmas:
+                        if lemma in genders:
+                            foundG = lemma
+                            gSentence = True
+                            break
+                    
+                if gSentence:
+                    out.write(str(sentence) + "\n")
+                    out.flush()
             
-    print("Found threads", found)
-            
+
+def readGenders(filename):
+    genders = set([])
+    for line in open(filename, 'r'):
+        # clear white spaces
+        words = line.strip().split()
+        
+        genders.add(" ".join(words))
+        genders.add("".join(words))
+        genders.add(SEP.join(words))
+
+        clearWords = clearText(line).split()
+
+        genders.add(" ".join(clearWords))
+        genders.add("".join(clearWords))
+        genders.add(SEP.join(clearWords))
+
+    return genders
+
 if __name__ == '__main__':
     import os, sys
 
     args = sys.argv[1:]
     inFile = bz2.open(args[0], 'rb')
-    genders = set([ line.strip() for line in open(args[1], 'r') ])
 
-    for line in inFile:
-        cmv = json.loads(line)
-    
-        print("TITLE", cmv["title"])
-        text = cmv["selftext"]
-
-        #if "&gt; *Hello," in text:
-        #    parts = text.split("&gt; *Hello,")
-        #    text = parts[0]
-            
-        doc = nlp(text)
-        for sentence in doc.sents:
-            lemmas = [ token.lemma_ for token in sentence ]
-            if "I" not in lemmas or "be" not in lemmas:
-                continue
-
-            kids = { }
-            beToks = [ ]
-            for tok in sentence:
-                if tok.head not in kids:
-                    kids[tok.head] = [ ]
-
-                kids[tok.head].append(tok)
-
-                if tok.lemma_ in [ "be" ]:
-                    beToks.append(tok)
-
-            for tok in beToks:
-                if tok in kids:
-                    if all( [ t.lemma_ != "I" for t in kids[tok] ]):
-                        continue
-
-                    for t in kids[tok]:
-                        if t.lemma_ not in demos:
-                            continue
-
-                        toPrint = [ ]
-                        if t in kids:
-                            toPrint += kids[t]
-
-                        print(t, toPrint, " ".join(str(sentence).strip().split()))
-
-            #    iamparts = sentence.split("I am a ")
-            #    print(" ".join(iamparts[1].split()[:20]))
-
-        if nr < 0:
-            break
-        nr -= 1
-
-
-    inFile.close()  
+    genders = readGenders(args[1])
+    out = open(args[2], 'w')
+    filterGenderSentences(inFile, genders, out)
