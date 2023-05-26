@@ -140,7 +140,9 @@ if __name__ == '__main__':
 	print('Variable Results:')
 	print(results)
 	print('')
-	print('Summary:')
-	print(summary)
+	with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+		print('Summary:')
+	with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+		print(summary)
 	print('')
 

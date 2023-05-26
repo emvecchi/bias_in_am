@@ -1,0 +1,255 @@
+-----------------------------
+::Model::
+Dependent Variable: explicit_gender
+Independent Variables: 'score'
+
+Distribution of Dependent Variable:
+count     377
+unique      2
+top         M
+freq      280
+Name: explicit_gender, dtype: object
+
+Variance Inflation Factor:
+           feature       VIF
+0  explicit_gender  1.069798
+1            score  1.069798
+
+Variable Results:
+  variable  f-reg_score  f_reg_p_value
+0    score     2.246361        0.13477
+
+Summary:
+         X                y  intercept               coefficients  R-squared
+0  [score]  explicit_gender  -1.130139  [[0.0013389786398313984]]   0.742706
+
+-----------------------------
+::Model::
+Dependent Variable: explicit_gender
+Independent Variables: 'ups'
+
+Distribution of Dependent Variable:
+count     377
+unique      2
+top         M
+freq      280
+Name: explicit_gender, dtype: object
+
+Variance Inflation Factor:
+           feature       VIF
+0  explicit_gender  1.069798
+1              ups  1.069798
+
+Variable Results:
+  variable  f-reg_score  f_reg_p_value
+0      ups     2.246361        0.13477
+
+Summary:
+       X                y  intercept               coefficients  R-squared
+0  [ups]  explicit_gender  -1.130139  [[0.0013389786398313984]]   0.742706
+
+-----------------------------
+::Model::
+Dependent Variable: explicit_gender
+Independent Variables: 'num_comments'
+
+Distribution of Dependent Variable:
+count     377
+unique      2
+top         M
+freq      280
+Name: explicit_gender, dtype: object
+
+Variance Inflation Factor:
+           feature       VIF
+0  explicit_gender  1.107571
+1     num_comments  1.107571
+
+Variable Results:
+       variable  f-reg_score  f_reg_p_value
+0  num_comments     0.021597       0.883244
+
+Summary:
+                X                y  intercept                coefficients  \
+0  [num_comments]  explicit_gender  -1.073163  [[0.00013923245027472398]]   
+
+   R-squared  
+0   0.742706  
+
+-----------------------------
+::Model::
+Dependent Variable: explicit_gender
+Independent Variables: 'downs'
+
+Distribution of Dependent Variable:
+count     377
+unique      2
+top         M
+freq      280
+Name: explicit_gender, dtype: object
+
+Variance Inflation Factor:
+           feature  VIF
+0  explicit_gender  1.0
+1            downs  NaN
+
+Variable Results:
+  variable  f-reg_score  f_reg_p_value
+0    downs          NaN            NaN
+
+Summary:
+         X                y  intercept coefficients  R-squared
+0  [downs]  explicit_gender  -1.060078      [[0.0]]   0.742706
+
+-----------------------------
+::Model::
+Dependent Variable: explicit_gender
+Independent Variables: 'num_comments', 'explicit_gender'
+
+Distribution of Dependent Variable:
+count     377
+unique      2
+top         M
+freq      280
+Name: explicit_gender, dtype: object
+
+Variance Inflation Factor:
+           feature       VIF
+0  explicit_gender       inf
+1     num_comments  1.107571
+2  explicit_gender       inf
+
+Variable Results:
+          variable   f-reg_score  f_reg_p_value
+0     num_comments  2.159660e-02       0.883244
+1  explicit_gender  1.125900e+17       0.000000
+
+Summary:
+                                 X                y  intercept  \
+0  [num_comments, explicit_gender]  explicit_gender  -3.761928   
+
+                                   coefficients  R-squared  
+0  [[7.715762351579243e-05, 6.404102801239798]]        1.0  
+
+-----------------------------
+::Model::
+Dependent Variable: explicit_gender
+Independent Variables: 'num_comments', 'score'
+
+Distribution of Dependent Variable:
+count     377
+unique      2
+top         M
+freq      280
+Name: explicit_gender, dtype: object
+
+Variance Inflation Factor:
+           feature       VIF
+0  explicit_gender  1.108862
+1     num_comments  2.376559
+2            score  2.295508
+
+Variable Results:
+       variable  f-reg_score  f_reg_p_value
+0  num_comments     0.021597       0.883244
+1         score     2.246361       0.134770
+
+Summary:
+                       X                y  intercept  \
+0  [num_comments, score]  explicit_gender  -1.030478   
+
+                                       coefficients  R-squared  
+0  [[-0.0017878300253345264, 0.002630290409208798]]   0.742706  
+
+-----------------------------
+::Model::
+Dependent Variable: explicit_gender
+Independent Variables: 'num_comments', 'ups'
+
+Distribution of Dependent Variable:
+count     377
+unique      2
+top         M
+freq      280
+Name: explicit_gender, dtype: object
+
+Variance Inflation Factor:
+           feature       VIF
+0  explicit_gender  1.108862
+1     num_comments  2.376559
+2              ups  2.295508
+
+Variable Results:
+       variable  f-reg_score  f_reg_p_value
+0  num_comments     0.021597       0.883244
+1           ups     2.246361       0.134770
+
+Summary:
+                     X                y  intercept  \
+0  [num_comments, ups]  explicit_gender  -1.030478   
+
+                                       coefficients  R-squared  
+0  [[-0.0017878300253345264, 0.002630290409208798]]   0.742706  
+
+-----------------------------
+::Model::
+Dependent Variable: explicit_gender
+Independent Variables: 'num_comments', 'score', 'ups'
+
+Distribution of Dependent Variable:
+count     377
+unique      2
+top         M
+freq      280
+Name: explicit_gender, dtype: object
+
+Variance Inflation Factor:
+           feature       VIF
+0  explicit_gender  1.108862
+1     num_comments  2.376559
+2            score       inf
+3              ups       inf
+
+Variable Results:
+       variable  f-reg_score  f_reg_p_value
+0  num_comments     0.021597       0.883244
+1         score     2.246361       0.134770
+2           ups     2.246361       0.134770
+
+Summary:
+                            X                y  intercept  \
+0  [num_comments, score, ups]  explicit_gender  -1.030474   
+
+                                        coefficients  R-squared  
+0  [[-0.0017877154070207034, 0.001315077477107672...   0.742706  
+
+-----------------------------
+::Model::
+Dependent Variable: explicit_gender
+Independent Variables: 'score', 'num_comments'
+
+Distribution of Dependent Variable:
+count     377
+unique      2
+top         M
+freq      280
+Name: explicit_gender, dtype: object
+
+Variance Inflation Factor:
+           feature       VIF
+0  explicit_gender  1.108862
+1            score  2.295508
+2     num_comments  2.376559
+
+Variable Results:
+       variable  f-reg_score  f_reg_p_value
+0         score     2.246361       0.134770
+1  num_comments     0.021597       0.883244
+
+Summary:
+                       X                y  intercept  \
+0  [score, num_comments]  explicit_gender  -1.030478   
+
+                                        coefficients  R-squared  
+0  [[0.0026302904092087975, -0.0017878300253345262]]   0.742706  
+
