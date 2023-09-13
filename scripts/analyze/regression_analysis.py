@@ -39,7 +39,7 @@ if __name__ == '__main__':
 		check_files(datafile,featurefile)
 
 	sys.stderr.write('\nLoading CMV data...\n')
-	subset, feature_df = load_dataframes(datafile, featurefile, dep_variable)
+	subset, feature_df = load_dataframes_new(datafile, featurefile)
 
 	print('-----------------------------')
 	print('::Model::')
@@ -48,11 +48,12 @@ if __name__ == '__main__':
 	print('')
 
 	print('Distribution of Dependent Variable: (M:0; F:1)')
-	print(subset[dep_variable].describe(include='all'))
+	#print(subset[dep_variable].describe(include='all'))
+	print(subset[dep_variable].value_counts())
 	print('')
 
 	# get the dataframe subset that has relevant CMV features, Tan et al (2016) text features, and ACL 2022 features
-	df = get_relevant_dataframe(subset, feature_df, dep_variable)
+	df = get_relevant_dataframe(subset, feature_df)
 
 	#m,results,summary = get_log_regression2(df, dep_variable, ind_variables)
 	#print('')
@@ -65,12 +66,9 @@ if __name__ == '__main__':
 	#	print(summary)
 	#print('')
 
-	model, result, lmg_scores = get_log_regression(df, dep_variable, ind_variables)
+	model, result = get_log_regression(df, dep_variable, ind_variables)
 	print(result.summary())
-	print('LMG Scores:')
-	for i, feature in enumerate(X.columns):
-    	print(f"\t{feature}: {lmg_scores[i]}")
-
+	
 
 
 
