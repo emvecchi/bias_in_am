@@ -140,6 +140,15 @@ def get_log_regression(df, dep_variable, ind_variables):
     get_lmg_r2_decomposition(X, y)
     return(model, result)
 
+def run_log_reg(df, dep_variable, ind_variables):
+    import statsmodels.api as sm
+    y = df[dep_variable]
+    X = df[ind_variables]
+    X = sm.add_constant(X)
+    model = sm.Logit(y, X)
+    result = model.fit()
+    print(result.summary())
+
 def get_lmg_r2_decomposition(X, y):
     import pandas as pd
     import numpy as np
