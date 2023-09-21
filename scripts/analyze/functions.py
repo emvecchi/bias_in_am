@@ -64,44 +64,6 @@ def get_correlations_heatmap(df, variables, outfile, x, y):
     heatmap = sns.heatmap(correlation_matrix, annot=True, xticklabels=1, yticklabels=1, cmap='Blues')
     heatmap.figure.savefig(outfile)
 
-def get_box_plots(df, variable, outfile):
-    plt.boxplot(df[variable])
-    plt.title('Range of Data for '+variable)
-    plt.xlabel(variable)
-    plt.ylabel('Values')
-    plt.savefig(outfile)
-
-def get_histo_graph(df, variable, outfile):
-    import numpy as np
-    plt.hist(df[variable], bins=np.arange(0, 100, 10))
-    plt.xlabel(variable)
-    plt.ylabel('Frequency')
-    plt.title('Distribution of '+variable)
-    plt.savefig(outfile)
-
-def get_ols_analysis(df, dep_variable, ind_variables1, ind_variables2):
-    from statsmodels.formula.api import ols
-    import statsmodels.api as sm
-    formula1 = get_formula(dep_variable, ind_variables1)
-    model1 = ols(formula1, data=df).fit()
-    formula2 = get_formula(dep_variable, ind_variables2)
-    model2 = ols(formula2, data=df).fit()
-    print(model1.summary())
-    print(model2.summary())
-    anova=get_anova(model1,model2)
-    print('ANOVA'+anova)
-    return(model1,model2)
-
-def get_ols_analysis_single_m(df, dep_variable, ind_variables):
-    import statsmodels.api as sm
-    from statsmodels.formula.api import ols
-    formula = get_formula(dep_variable, ind_variables)
-    model = ols(formula, data=df).fit()
-    print(model.summary())
-    anova_table = sm.stats.anova_lm(model, typ=2)
-    print(anova_table)
-    return(model)
-
 def get_variable_importance(df, dep_variable, ind_variables):
     import pandas as pd
     from sklearn.ensemble import RandomForestClassifier
@@ -122,32 +84,6 @@ def get_variable_importance(df, dep_variable, ind_variables):
         'importance': importances
         })
     return(results)
-
-def get_log_regression(df, dep_variable, ind_variables):
-    import pandas as pd
-    import statsmodels.api as sm
-    y = df[dep_variable]
-    X = df[ind_variables]
-    X = sm.add_constant(X)
-    model = sm.Logit(y, X)
-    result = model.fit()
-    #Z=df[[dep_variable]+ind_variables]
-    Z=df[ind_variables]
-    print('Variance Inflation Factor:')
-    print(get_vif(Z))
-    print()
-    print('LMG R^2 Decomposition:')
-    get_lmg_r2_decomposition(X, y)
-    return(model, result)
-
-def run_log_reg(df, dep_variable, ind_variables):
-    import statsmodels.api as sm
-    y = df[dep_variable]
-    X = df[ind_variables]
-    X = sm.add_constant(X)
-    model = sm.Logit(y, X)
-    result = model.fit()
-    print(result.summary())
 
 def get_lmg_r2_decomposition(X, y):
     import pandas as pd
@@ -170,6 +106,23 @@ def get_lmg_r2_decomposition(X, y):
     # Print the LMG R^2 decomposition scores
     for i, feature in enumerate(feature_names):
         print(f"\t{feature}: \t\t{lmg_r2_decomposition[i]}")
+
+def get_log_regression(df, dep_variable, ind_variables):
+    import pandas as pd
+    import statsmodels.api as sm
+    y = df[dep_variable]
+    X = df[ind_variables]
+    X = sm.add_constant(X)
+    model = sm.Logit(y, X)
+    result = model.fit()
+    #Z=df[[dep_variable]+ind_variables]
+    Z=df[ind_variables]
+    print('Variance Inflation Factor:')
+    print(get_vif(Z))
+    print()
+    print('LMG R^2 Decomposition:')
+    get_lmg_r2_decomposition(X, y)
+    return(model, result)
 
 def get_log_regression2(df, dep_variable, ind_variables):
     from sklearn.linear_model import LogisticRegression
@@ -210,13 +163,6 @@ def get_vif(X):
                           for i in range(len(X.columns))]
     return(vif_data)
 
-def get_mixed_effects_regression(df, dep_variable, ind_variables, random_variable, group_by):
-    formula = get_formula(dep_variable, ind_variables)
-    formula += ' + (1 | '+random_variable+')'
-    model = smf.mixedlm(formula, data=df, groups = df[group_by])
-    result = model.fit()
-    return(result)
-
 def get_formula(dep_variable, ind_variables):
     formula = dep_variable + ' ~ ' + ind_variables[0]
     x = 1
@@ -229,29 +175,6 @@ def get_anova(m1, m2):
     import statsmodels.api as sm
     anova_table = sm.stats.anova_lm(m1,m2)
     return(anova_table)
-
-def load_dataframes(datafile, featurefile, dep_variable):
-    import sys, json, os, ast
-    import pandas as pd
-    with open(datafile, 'r') as f:
-        data = [json.loads(line) for line in f]
-    df = pd.DataFrame(data)
-    subset = df[df[dep_variable].isin(['M', 'F'])].copy()
-    subset[dep_variable] = subset[dep_variable].map({'M': 0, 'F': 1})
-    subset['edited_binary'] = subset['edited'].apply(lambda x: 0 if x is False else 1 if pd.notnull(x) else None)
-    tmp_feature_df = pd.read_csv(featurefile, lineterminator="\n")
-    tmp_feature_df = tmp_feature_df.drop("Unnamed: 0",axis=1)
-    tmp_feature_df = tmp_feature_df[tmp_feature_df['id'].isin(subset['id'])].copy()
-    expanded_df = pd.DataFrame()
-    for _, row in tmp_feature_df.iterrows():
-        feature_set_str = row['feature_set']
-        feature_set_dict = ast.literal_eval(feature_set_str)
-        temp_df = pd.DataFrame.from_records([feature_set_dict], index=[row['id']])
-        expanded_df = expanded_df.append(temp_df)
-    feature_df = tmp_feature_df.drop('feature_set', axis=1).merge(expanded_df, left_on='id', right_index=True)
-    feature_df = feature_df.rename(columns={'text_x':'text'})
-    feature_df = feature_df.rename(columns={'type_x':'type'})
-    return(subset, feature_df)
 
 def load_dataframes_new(datafile, featurefile):
     import sys, json, os, ast
@@ -325,65 +248,65 @@ def get_acl2022_feature_subset(df):
                     'imperative',
                     'NOUN',
                     'VERB',
-                    'complex_words']
-#                    'Amusement_GALC',
-#                    'Anger_GALC',
-#                    'Anxiety_GALC',
-#                    'Beingtouched_GALC',
-#                    'Boredom_GALC',
-#                    'Compassion_GALC',
-#                    'Contempt_GALC',
-#                    'Contentment_GALC',
-#                    'Desperation_GALC',
-#                    'Disappointment_GALC',
-#                    'Disgust_GALC',
-#                    'Dissatisfaction_GALC',
-#                    'Envy_GALC',
-#                    'Fear_GALC',
-#                    'Feelinglove_GALC',
-#                    'Gratitude_GALC',
-#                    'Guilt_GALC',
-#                    'Happiness_GALC',
-#                    'Hatred_GALC',
-#                    'Hope_GALC',
-#                    'Humility_GALC',
-#                    'Interest/Enthusiasm_GALC',
-#                    'Irritation_GALC',
-#                    'Jealousy_GALC',
-#                    'Joy_GALC',
-#                    'Longing_GALC',
-#                    'Lust_GALC',
-#                    'Pleasure/Enjoyment_GALC',
-#                    'Pride_GALC',
-#                    'Relaxation/Serenity_GALC',
-#                    'Relief_GALC',
-#                    'Sadness_GALC',
-#                    'Shame_GALC',
-#                    'Surprise_GALC',
-#                    'Tension/Stress_GALC',
-#                    'Positive_GALC',
-#                    'Negative_GALC',
-#                    'Anger_EmoLex',
-#                    'Anticipation_EmoLex',
-#                    'Disgust_EmoLex',
-#                    'Fear_EmoLex',
-#                    'Joy_EmoLex',
-#                    'Negative_EmoLex',
-#                    'Positive_EmoLex',
-#                    'Sadness_EmoLex',
-#                    'Surprise_EmoLex',
-#                    'Trust_EmoLex',
-#                    'Dominance',
-#                    'Dominance_nwords',
-#                    'pleasantness',
-#                    'attention',
-#                    'sensitivity',
-#                    'aptitude',
-#                    'polarity',
-#                    'vader_negative',
-#                    'vader_neutral',
-#                    'vader_positive',
-#                    'vader_compound']
+                    'complex_words',
+                    'Amusement_GALC',
+                    'Anger_GALC',
+                    'Anxiety_GALC',
+                    'Beingtouched_GALC',
+                    'Boredom_GALC',
+                    'Compassion_GALC',
+                    'Contempt_GALC',
+                    'Contentment_GALC',
+                    'Desperation_GALC',
+                    'Disappointment_GALC',
+                    'Disgust_GALC',
+                    'Dissatisfaction_GALC',
+                    'Envy_GALC',
+                    'Fear_GALC',
+                    'Feelinglove_GALC',
+                    'Gratitude_GALC',
+                    'Guilt_GALC',
+                    'Happiness_GALC',
+                    'Hatred_GALC',
+                    'Hope_GALC',
+                    'Humility_GALC',
+                    'Interest/Enthusiasm_GALC',
+                    'Irritation_GALC',
+                    'Jealousy_GALC',
+                    'Joy_GALC',
+                    'Longing_GALC',
+                    'Lust_GALC',
+                    'Pleasure/Enjoyment_GALC',
+                    'Pride_GALC',
+                    'Relaxation/Serenity_GALC',
+                    'Relief_GALC',
+                    'Sadness_GALC',
+                    'Shame_GALC',
+                    'Surprise_GALC',
+                    'Tension/Stress_GALC',
+                    'Positive_GALC',
+                    'Negative_GALC',
+                    'Anger_EmoLex',
+                    'Anticipation_EmoLex',
+                    'Disgust_EmoLex',
+                    'Fear_EmoLex',
+                    'Joy_EmoLex',
+                    'Negative_EmoLex',
+                    'Positive_EmoLex',
+                    'Sadness_EmoLex',
+                    'Surprise_EmoLex',
+                    'Trust_EmoLex',
+                    'Dominance',
+                    'Dominance_nwords',
+                    'pleasantness',
+                    'attention',
+                    'sensitivity',
+                    'aptitude',
+                    'polarity',
+                    'vader_negative',
+                    'vader_neutral',
+                    'vader_positive',
+                    'vader_compound']
     feature_subset = df[['id','text','type']+acl2022_features]
     return(feature_subset)
 
