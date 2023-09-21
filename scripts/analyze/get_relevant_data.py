@@ -5,10 +5,10 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from functions import *
 
-train_datafile = '/mount/arbeitsdaten14/projekte/sfb-732/d8/falensaa/BiasInArguments/intermediate-data/tal_elal_2016/train_period_data.annotations-ver2.masked.topics.jsonlist'
+train_datafile = '/mount/arbeitsdaten14/projekte/sfb-732/d8/falensaa/BiasInArguments/intermediate-data/tal_elal_2016/train_period_data.annotations-ver2.topics.jsonlist'
 train_featurefile='/mount/arbeitsdaten14/projekte/sfb-732/d8/falensaa/BiasInArguments/intermediate-data/tal_elal_2016/feature_sets/train_op_final.csv'
 
-heldout_datafile = '/mount/arbeitsdaten14/projekte/sfb-732/d8/falensaa/BiasInArguments/intermediate-data/tal_elal_2016/heldout_period_data.annotations-ver2.masked.topics.jsonlist'
+heldout_datafile = '/mount/arbeitsdaten14/projekte/sfb-732/d8/falensaa/BiasInArguments/intermediate-data/tal_elal_2016/heldout_period_data.annotations-ver2.topics.jsonlist'
 heldout_featurefile='/mount/arbeitsdaten14/projekte/sfb-732/d8/falensaa/BiasInArguments/intermediate-data/tal_elal_2016/feature_sets/heldout_op_final.csv'
 
 train_classifierfeaturefiles=['data/bias_in_AM/train_toxicity_scores.csv','data/bias_in_AM/train_sentiment_scores.csv', 'data/bias_in_AM/train_aq_scores.csv']
@@ -68,7 +68,7 @@ full_tan2016_features = [
 
 df_acl2022_tan2016 = pd.merge(df_acl2022, feature_df[['id']+full_tan2016_features], on='id', how='left')
 
-df = pd.merge(df_acl2022_tan2016, subset[['id','author_gender', 'explicit_gender', 'num_comments', 'score', 'edited_binary', 'topic', 'masked_selftext']], on='id', how='left')
+df = pd.merge(df_acl2022_tan2016, subset[['id','author_gender', 'explicit_gender', 'num_comments', 'score', 'edited_binary', 'topic']], on='id', how='left')
 
 df = pd.merge(df,comment_info, on='id', how='left')
 
