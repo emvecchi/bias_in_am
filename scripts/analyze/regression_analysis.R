@@ -45,10 +45,10 @@ for (cluster_id in unique(clusters)) {
   if (length(colnames(cor_matrix_spearman)[clusters == cluster_id]) > 1){
        list_length <- length(colnames(cor_matrix_spearman)[clusters == cluster_id])
        # Drop either all but first or all but last items in clusters with colinearity
-       if (cluster_id < 34 || cluster_id == 53 ){
+       if (cluster_id < 88 || cluster_id == 95 ){
               columns_to_drop <- colnames(cor_matrix_spearman)[clusters == cluster_id][-1]
        }
-       if (cluster_id == 51 || cluster_id == 58){ 
+       if (cluster_id == 93 || cluster_id == 100){ 
               columns_to_drop <- colnames(cor_matrix_spearman)[clusters == cluster_id][1:(list_length - 1)]
        }
        df <- df[, !colnames(df) %in% columns_to_drop]
@@ -80,7 +80,7 @@ filtered_column_names <- names(subset_df)[filtered_columns]
 
 counter<-1
 #for (dependent_var in c('author_gender', 'score', 'perc_author_gender_in_comments_m', 'perc_author_gender_in_comments_f', 'gender_source')){
-dependent_var <- 'score'
+dependent_var <- 'author_gender'
 filtered_column_names_ivs_a <- setdiff(filtered_column_names, dependent_var)
 cmv_extracted_feats <- subset(subset_df, select=c(filtered_column_names))
 ling_feats <- subset(subset_df, select= -filtered_columns)
@@ -106,7 +106,7 @@ print(summary(stepAICmodelAB))
 significant_featuresAB <- summary(stepAICmodelAB)$coefficients[summary(stepAICmodelAB)$coefficients[, sig_var] < 0.05, ]
 plotA<-plot_model(stepAICmodelA, type = "std", show.p = TRUE, show.values=TRUE, width = 0.1, value.size = 3, dot.size =.5, sort.est = TRUE, terms = c(rownames(significant_featuresA)), 
 title = '') + theme_sjplot()
-save_plot_to_pdf(plotA, paste('groupA_',counter,'.pdf', sep=''),4,1.8)
+save_plot_to_pdf(plotA, paste('groupA_',counter,'.pdf', sep=''),5,2)
 plotAB<-plot_model(stepAICmodelAB, type='std', show.values = TRUE, width = 0.1, value.size = 3, dot.size =.5, sort.est = TRUE, terms = c(rownames(significant_featuresAB)), 
 title = '') + theme_sjplot()
 save_plot_to_pdf(plotAB, paste('groupAB_',counter,'.pdf', sep=''),5,4)
