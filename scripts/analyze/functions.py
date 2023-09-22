@@ -306,7 +306,22 @@ def get_acl2022_feature_subset(df):
                     'vader_negative',
                     'vader_neutral',
                     'vader_positive',
-                    'vader_compound']
+                    'vader_compound',
+                    'COCA_spoken_Bigram_Frequency',
+                    'COCA_spoken_Frequency_AW',
+                    'COCA_spoken_Range_AW',
+                    'COCA spoken bi MI2',
+                    'All_AWL_Normed',
+                    'WN_Mean_Accuracy',
+                    'LD_Mean_Accuracy',
+                    'LD_Mean_RT',
+                    'MRC_Familiarity_AW',
+                    'MRC_Imageability_AW',
+                    'Brysbaert_Concreteness_Combined_AW',
+                    'McD_CD_AW',
+                    'Sem_D_AW',
+                    'content_poly',
+                    'hyper_verb_noun_Sav_Pav']
     feature_subset = df[['id','text','type']+acl2022_features]
     return(feature_subset)
 

@@ -113,7 +113,7 @@ for (dependent_var in c('explicit_gender', 'score', 'perc_author_gender_in_comme
               width = 0.1, value.size = 3, dot.size =.5, sort.est = TRUE, 
               terms = c(rownames(significant_featuresA)), 
               title = '') + theme_sjplot()
-       save_plot_to_pdf(plotA, paste('groupa_',counter,'.pdf', sep=''), 5, 2)
+       save_plot_to_pdf(plotA, paste('groupa_',counter,'.pdf', sep=''), 5, 1.8)
        significant_featuresAB <- summary(stepAICmodelAB)$coefficients[summary(stepAICmodelAB)$coefficients[, sig_var] < 0.05, ]
        plotAB<-plot_model(stepAICmodelAB, type = "std", show.values = TRUE, 
               width = 0.1, value.size = 3, dot.size =.5, sort.est = TRUE, 
@@ -127,5 +127,3 @@ for (dependent_var in c('explicit_gender', 'score', 'perc_author_gender_in_comme
        counter<-counter+1
 }
 close(summary_file)
-#ivs_explicit_a = c('num_comments','score','perc_author_gender_in_comments_m','perc_author_gender_in_comments_f','score*num_comments')
-#ivs_explicit_ab = c('num_comments','score','perc_author_gender_in_comments_m','perc_author_gender_in_comments_f','mtld_original_aw','past_tense','action_component','certainty_component','joy_component','objects_component','positive_nouns_component','VERB','indefinite_article_perc','Valence','toxicity_neutral','toxicity_toxic','sentiment_positive','score*num_comments')

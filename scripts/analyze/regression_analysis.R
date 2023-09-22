@@ -114,14 +114,13 @@ for (dependent_var in c('author_gender', 'score', 'perc_author_gender_in_comment
               width = 0.1, value.size = 3, dot.size =.5, sort.est = TRUE, 
               terms = c(rownames(significant_featuresA)), 
               title = '') + theme_sjplot()
-       save_plot_to_pdf(plotA, paste('groupA_',counter,'.pdf', sep=''),5,2)
+       save_plot_to_pdf(plotA, paste('groupA_',counter,'.pdf', sep=''),5,1.8)
        significant_featuresAB <- summary(stepAICmodelAB)$coefficients[summary(stepAICmodelAB)$coefficients[, sig_var] < 0.05, ]
        plotAB<-plot_model(stepAICmodelAB, type='std', show.values = TRUE, 
               width = 0.1, value.size = 3, dot.size =.5, sort.est = TRUE, 
               terms = c(rownames(significant_featuresAB)), 
               title = '') + theme_sjplot()
        save_plot_to_pdf(plotAB, paste('groupAB_',counter,'.pdf', sep=''),5,4)
-       
        print(summary(stepAICmodelA))
        save_summary(stepAICmodelA, dependent_var, summary_file)
        print(summary(stepAICmodelAB))
@@ -129,5 +128,7 @@ for (dependent_var in c('author_gender', 'score', 'perc_author_gender_in_comment
        counter<-counter+1
 }
 close(summary_file)
-#ivs_authgender_a = c('num_comments','score','perc_author_gender_in_comments_m', 'perc_author_gender_in_comments_f','gender_source','score*num_comments')
-#ivs_authgender_ab = c('num_comments','score','perc_author_gender_in_comments_m','perc_author_gender_in_comments_f','mtld_original_aw','past_tense','action_component','certainty_component','joy_component','objects_component','positive_nouns_component','VERB','indefinite_article_perc','Valence','toxicity_neutral','toxicity_toxic','sentiment_positive','score*num_comments')
+
+
+'flesch', 'gunningFog','ttr'
+'flesch_readability_score', 'Gunning Fog simplicity', 'token_type_ratio'
