@@ -9,6 +9,8 @@ library(sjPlot)
 gender_type<-'explicit_gender'
 
 data <- read.csv('data/bias_in_AM/data_for_analysis.csv')
+file_path <- "models_summary_explicit_gender.txt"
+summary_file <- file(file_path, "a")
 
 data$gender_source <- ifelse(data$gender_source == 'explicit', 1.0, 0.0)
 data$sentiment <- ifelse(data$sentiment == 'negative', -1,
@@ -17,7 +19,7 @@ data$sentiment <- ifelse(data$sentiment == 'negative', -1,
 
 # work only with author_gender (not considering explicit gender info)
 df <- data[data$explicit_gender %in% c(0, 1), ]
-df <- subset(df, select = -c(gender_source, author_gender, imperative, PRON, aq_masked_score, masked_selftext_x, masked_selftext_y, tmp_masked_selftext_x, tmp_masked_selftext_y, pdf_link_count))
+df <- subset(df, select = -c(gender_source, author_gender, imperative, PRON, aq_masked_score, masked_selftext_x, masked_selftext_y, tmp_masked_selftext_x, tmp_masked_selftext_y, pdf_link_count, Envy_GALC))
 
 cor_matrix_spearman <- cor(df[, 4:ncol(df)], method = "spearman")
 get_clusters <- function(cor_matrix, threshold) {
@@ -45,10 +47,10 @@ for (cluster_id in unique(clusters)) {
   if (length(colnames(cor_matrix_spearman)[clusters == cluster_id]) > 1){
        list_length <- length(colnames(cor_matrix_spearman)[clusters == cluster_id])
        # Drop either all but first or all but last items in clusters with colinearity
-       if (cluster_id < 34 || cluster_id == 51 ){
+       if (cluster_id < 86 || cluster_id == 92 ){
               columns_to_drop <- colnames(cor_matrix_spearman)[clusters == cluster_id][-1]
        }
-       if (cluster_id == 49 || cluster_id == 57){ 
+       if (cluster_id == 90 || cluster_id == 98 || cluster_id == 87){ 
               columns_to_drop <- colnames(cor_matrix_spearman)[clusters == cluster_id][1:(list_length - 1)]
        }
        df <- df[, !colnames(df) %in% columns_to_drop]
@@ -74,48 +76,56 @@ save_plot_to_pdf <- function(plot, file_name, w, h) {
   dev.off()
 }
 
+save_summary <- function(model, dependent_var, file_path) {
+       writeLines('#######################################################', file_path)
+       writeLines(paste('Dependent Variable:',dependent_var), file_path)
+       writeLines(capture.output(summary(model)$coef[,0]), file_path)
+       writeLines(capture.output(summary(model)), file_path)
+}
+
 filter_strings <- c('gender', 'score', 'num_comments')
 filtered_columns <- grep(paste(filter_strings, collapse = '|'), names(subset_df))
 filtered_column_names <- names(subset_df)[filtered_columns]
 
 counter<-1
-#for (dependent_var in c('explicit_gender', 'score', 'perc_author_gender_in_comments_m', 'perc_author_gender_in_comments_f')){
-dependent_var <- 'perc_author_gender_in_comments_f'
-filtered_column_names_ivs_a <- setdiff(filtered_column_names, dependent_var)
-cmv_extracted_feats <- subset(subset_df, select=c(filtered_column_names))
-ling_feats <- subset(subset_df, select= -filtered_columns)
-ling_feats <- ling_feats[, 4:ncol(ling_feats)]
-combined_df <- data.frame(cmv_extracted_feats, ling_feats)
-filtered_column_names_ivs_ab <- c(filtered_column_names_ivs_a, colnames(ling_feats))
-if (dependent_var %in% c('explicit_gender','gender_source')){
-       modelA <- glm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_a, collapse = " + ", '+ (score*num_comments)')), data = cmv_extracted_feats, family=binomial)
-       stepAICmodelA <- glm(run_stepAIC(modelA), data = cmv_extracted_feats, family=binomial)
-       modelAB <- glm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_ab, collapse = " + ", '+ (score*num_comments)')), data = combined_df, family=binomial)
-       stepAICmodelAB <- glm(run_stepAIC(modelAB), data = combined_df, family=binomial)
-       sig_var <- "Pr(>|z|)"
-} else {
-       modelA <- lm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_a, collapse = " + ")), data = cmv_extracted_feats)
-       stepAICmodelA <- lm(run_stepAIC(modelA), data = cmv_extracted_feats)
-       modelAB <- lm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_ab, collapse = " + ")), data = combined_df)
-       stepAICmodelAB <- lm(run_stepAIC(modelAB), data = combined_df)
-       sig_var <- "Pr(>|t|)"
+for (dependent_var in c('explicit_gender', 'score', 'perc_author_gender_in_comments_m', 'perc_author_gender_in_comments_f')){
+       filtered_column_names_ivs_a <- setdiff(filtered_column_names, dependent_var)
+       cmv_extracted_feats <- subset(subset_df, select=c(filtered_column_names))
+       ling_feats <- subset(subset_df, select= -filtered_columns)
+       ling_feats <- ling_feats[, 4:ncol(ling_feats)]
+       combined_df <- data.frame(cmv_extracted_feats, ling_feats)
+       filtered_column_names_ivs_ab <- c(filtered_column_names_ivs_a, colnames(ling_feats))
+       if (dependent_var %in% c('explicit_gender','gender_source')){
+              modelA <- glm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_a, collapse = " + ")), data = cmv_extracted_feats, family=binomial)
+              stepAICmodelA <- glm(run_stepAIC(modelA), data = cmv_extracted_feats, family=binomial)
+              modelAB <- glm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_ab, collapse = " + ")), data = combined_df, family=binomial)
+              stepAICmodelAB <- glm(run_stepAIC(modelAB), data = combined_df, family=binomial)
+              sig_var <- "Pr(>|z|)"
+       } else {
+              modelA <- lm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_a, collapse = " + ")), data = cmv_extracted_feats)
+              stepAICmodelA <- lm(run_stepAIC(modelA), data = cmv_extracted_feats)
+              modelAB <- lm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_ab, collapse = " + ")), data = combined_df)
+              stepAICmodelAB <- lm(run_stepAIC(modelAB), data = combined_df)
+              sig_var <- "Pr(>|t|)"
+       }
+       significant_featuresA <- summary(stepAICmodelA)$coefficients[summary(stepAICmodelA)$coefficients[, sig_var] < 0.05, ]
+       plotA<-plot_model(stepAICmodelA, type = "std", show.values = TRUE, 
+              width = 0.1, value.size = 3, dot.size =.5, sort.est = TRUE, 
+              terms = c(rownames(significant_featuresA)), 
+              title = '') + theme_sjplot()
+       save_plot_to_pdf(plotA, paste('groupa_',counter,'.pdf', sep=''), 5, 2)
+       significant_featuresAB <- summary(stepAICmodelAB)$coefficients[summary(stepAICmodelAB)$coefficients[, sig_var] < 0.05, ]
+       plotAB<-plot_model(stepAICmodelAB, type = "std", show.values = TRUE, 
+              width = 0.1, value.size = 3, dot.size =.5, sort.est = TRUE, 
+              terms = c(rownames(significant_featuresAB)), 
+              title = '') + theme_sjplot()
+       save_plot_to_pdf(plotAB, paste('groupab_',counter,'.pdf', sep=''), 5, 4)
+       print(summary(stepAICmodelA))
+       save_summary(stepAICmodelA, dependent_var, summary_file)
+       print(summary(stepAICmodelAB))
+       save_summary(stepAICmodelAB, dependent_var, summary_file)
+       counter<-counter+1
 }
-print(summary(stepAICmodelA))
-significant_featuresA <- summary(stepAICmodelA)$coefficients[summary(stepAICmodelA)$coefficients[, sig_var] < 0.05, ]
-#print('Significant Features')
-#print(xtable(significant_featuresA[, c(0,3,4)]))
-print(summary(stepAICmodelAB))
-significant_featuresAB <- summary(stepAICmodelAB)$coefficients[summary(stepAICmodelAB)$coefficients[, sig_var] < 0.05, ]
-#print('Significant Features')
-#print(xtable(significant_featuresAB[, c(0,3,4)]))
-plotA<-plot_model(stepAICmodelA, type = "std", show.values = TRUE, width = 0.1, value.size = 3, dot.size =.5, sort.est = TRUE, terms = c(rownames(significant_featuresA)), 
-title = '') + theme_sjplot()
-save_plot_to_pdf(plotA, paste('groupa_',counter,'.pdf', sep=''), 5, 2)
-plotAB<-plot_model(stepAICmodelAB, type = "std", show.values = TRUE, width = 0.1, value.size = 3, dot.size =.5, sort.est = TRUE, terms = c(rownames(significant_featuresAB)), 
-title = '') + theme_sjplot()
-save_plot_to_pdf(plotAB, paste('groupab_',counter,'.pdf', sep=''), 5, 5)
-counter<-counter+1
-#}
-
-ivs_explicit_a = c('num_comments','score','perc_author_gender_in_comments_m','perc_author_gender_in_comments_f','score*num_comments')
-ivs_explicit_ab = c('num_comments','score','perc_author_gender_in_comments_m','perc_author_gender_in_comments_f','mtld_original_aw','past_tense','action_component','certainty_component','joy_component','objects_component','positive_nouns_component','VERB','indefinite_article_perc','Valence','toxicity_neutral','toxicity_toxic','sentiment_positive','score*num_comments')
+close(summary_file)
+#ivs_explicit_a = c('num_comments','score','perc_author_gender_in_comments_m','perc_author_gender_in_comments_f','score*num_comments')
+#ivs_explicit_ab = c('num_comments','score','perc_author_gender_in_comments_m','perc_author_gender_in_comments_f','mtld_original_aw','past_tense','action_component','certainty_component','joy_component','objects_component','positive_nouns_component','VERB','indefinite_article_perc','Valence','toxicity_neutral','toxicity_toxic','sentiment_positive','score*num_comments')
