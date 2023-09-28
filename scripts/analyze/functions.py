@@ -176,6 +176,20 @@ def get_anova(m1, m2):
     anova_table = sm.stats.anova_lm(m1,m2)
     return(anova_table)
 
+def load_dataframes(datafile, featurefile):
+    import sys, json, os, ast
+    import pandas as pd
+    with open(datafile, 'r') as f:
+        data = [json.loads(line) for line in f]
+    df = pd.DataFrame(data)
+    mask = df[['author_gender', 'explicit_gender']].isin(['M', 'F']).any(axis=1)
+    subset = df[mask].copy()
+    subset['author_gender'] = subset['author_gender'].map({'M': 0, 'F': 1})
+    subset['explicit_gender'] = subset['explicit_gender'].map({'M': 0, 'F': 1})
+    subset['edited_binary'] = subset['edited'].apply(lambda x: 0 if x is False else 1 if pd.notnull(x) else None)
+    feature_df = pd.read_csv(featurefile, sep=',')
+    return(subset, feature_df)
+
 def load_dataframes_new(datafile, featurefile):
     import sys, json, os, ast
     import pandas as pd
@@ -249,43 +263,43 @@ def get_acl2022_feature_subset(df):
                     'NOUN',
                     'VERB',
                     'complex_words',
-                    'Amusement_GALC',
-                    'Anger_GALC',
-                    'Anxiety_GALC',
-                    'Beingtouched_GALC',
-                    'Boredom_GALC',
-                    'Compassion_GALC',
-                    'Contempt_GALC',
-                    'Contentment_GALC',
-                    'Desperation_GALC',
-                    'Disappointment_GALC',
-                    'Disgust_GALC',
-                    'Dissatisfaction_GALC',
-                    'Envy_GALC',
-                    'Fear_GALC',
-                    'Feelinglove_GALC',
-                    'Gratitude_GALC',
-                    'Guilt_GALC',
-                    'Happiness_GALC',
-                    'Hatred_GALC',
-                    'Hope_GALC',
-                    'Humility_GALC',
-                    'Interest/Enthusiasm_GALC',
-                    'Irritation_GALC',
-                    'Jealousy_GALC',
-                    'Joy_GALC',
-                    'Longing_GALC',
-                    'Lust_GALC',
-                    'Pleasure/Enjoyment_GALC',
-                    'Pride_GALC',
-                    'Relaxation/Serenity_GALC',
-                    'Relief_GALC',
-                    'Sadness_GALC',
-                    'Shame_GALC',
-                    'Surprise_GALC',
-                    'Tension/Stress_GALC',
-                    'Positive_GALC',
-                    'Negative_GALC',
+                    #'Amusement_GALC',
+                    #'Anger_GALC',
+                    #'Anxiety_GALC',
+                    #'Beingtouched_GALC',
+                    #'Boredom_GALC',
+                    #'Compassion_GALC',
+                    #'Contempt_GALC',
+                    #'Contentment_GALC',
+                    #'Desperation_GALC',
+                    #'Disappointment_GALC',
+                    #'Disgust_GALC',
+                    #'Dissatisfaction_GALC',
+                    #'Envy_GALC',
+                    #'Fear_GALC',
+                    #'Feelinglove_GALC',
+                    #'Gratitude_GALC',
+                    #'Guilt_GALC',
+                    #'Happiness_GALC',
+                    #'Hatred_GALC',
+                    #'Hope_GALC',
+                    #'Humility_GALC',
+                    #'Interest/Enthusiasm_GALC',
+                    #'Irritation_GALC',
+                    #'Jealousy_GALC',
+                    #'Joy_GALC',
+                    #'Longing_GALC',
+                    #'Lust_GALC',
+                    #'Pleasure/Enjoyment_GALC',
+                    #'Pride_GALC',
+                    #'Relaxation/Serenity_GALC',
+                    #'Relief_GALC',
+                    #'Sadness_GALC',
+                    #'Shame_GALC',
+                    #'Surprise_GALC',
+                    #'Tension/Stress_GALC',
+                    #'Positive_GALC',
+                    #'Negative_GALC',
                     'Anger_EmoLex',
                     'Anticipation_EmoLex',
                     'Disgust_EmoLex',
@@ -302,26 +316,24 @@ def get_acl2022_feature_subset(df):
                     'attention',
                     'sensitivity',
                     'aptitude',
-                    'polarity',
-                    'vader_negative',
-                    'vader_neutral',
-                    'vader_positive',
-                    'vader_compound',
-                    'COCA_spoken_Bigram_Frequency',
-                    'COCA_spoken_Frequency_AW',
-                    'COCA_spoken_Range_AW',
-                    'COCA spoken bi MI2',
-                    'All_AWL_Normed',
-                    'WN_Mean_Accuracy',
-                    'LD_Mean_Accuracy',
-                    'LD_Mean_RT',
-                    'MRC_Familiarity_AW',
-                    'MRC_Imageability_AW',
-                    'Brysbaert_Concreteness_Combined_AW',
-                    'McD_CD_AW',
-                    'Sem_D_AW',
-                    'content_poly',
-                    'hyper_verb_noun_Sav_Pav']
+                    'polarity']
+                    #'vader_negative',
+                    #'vader_neutral',
+                    #'vader_positive',
+                    #'vader_compound',
+                    #'COCA_spoken_Bigram_Frequency',
+                    #'COCA_spoken_Frequency_AW',
+                    #'COCA_spoken_Range_AW',
+                    #'COCA_spoken_bi_MI2',
+                    #'All_AWL_Normed',
+                    #'WN_Mean_Accuracy',
+                    #'LD_Mean_Accuracy',
+                    #'LD_Mean_RT',
+                    #'MRC_Familiarity_AW',
+                    #'MRC_Imageability_AW',
+                    #'Brysbaert_Concreteness_Combined_AW',
+                    #'content_poly',
+                    #'hyper_verb_noun_Sav_Pav']
     feature_subset = df[['id','text','type']+acl2022_features]
     return(feature_subset)
 

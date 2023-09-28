@@ -6,22 +6,22 @@ import matplotlib.pyplot as plt
 from functions import *
 
 train_datafile = '/mount/arbeitsdaten14/projekte/sfb-732/d8/falensaa/BiasInArguments/intermediate-data/tal_elal_2016/train_period_data.annotations-ver2.topics.jsonlist'
-train_featurefile='/mount/arbeitsdaten14/projekte/sfb-732/d8/falensaa/BiasInArguments/intermediate-data/tal_elal_2016/feature_sets/train_op_final.csv'
+train_featurefile='/mount/arbeitsdaten14/projekte/sfb-732/d8/falensaa/BiasInArguments/intermediate-data/tal_elal_2016/feature_sets/train_OP.csv'
 
-heldout_datafile = '/mount/arbeitsdaten14/projekte/sfb-732/d8/falensaa/BiasInArguments/intermediate-data/tal_elal_2016/heldout_period_data.annotations-ver2.topics.jsonlist'
-heldout_featurefile='/mount/arbeitsdaten14/projekte/sfb-732/d8/falensaa/BiasInArguments/intermediate-data/tal_elal_2016/feature_sets/heldout_op_final.csv'
+#heldout_datafile = '/mount/arbeitsdaten14/projekte/sfb-732/d8/falensaa/BiasInArguments/intermediate-data/tal_elal_2016/heldout_period_data.annotations-ver2.topics.jsonlist'
+#heldout_featurefile='/mount/arbeitsdaten14/projekte/sfb-732/d8/falensaa/BiasInArguments/intermediate-data/tal_elal_2016/feature_sets/heldout_op_final.csv'
 
 train_classifierfeaturefiles=['data/bias_in_AM/train_toxicity_scores.csv','data/bias_in_AM/train_sentiment_scores.csv', 'data/bias_in_AM/train_aq_scores.csv']
-heldout_classifierfeaturefiles=['data/bias_in_AM/heldout_toxicity_scores.csv','data/bias_in_AM/heldout_sentiment_scores.csv', 'data/bias_in_AM/heldout_aq_scores.csv']
+#heldout_classifierfeaturefiles=['data/bias_in_AM/heldout_toxicity_scores.csv','data/bias_in_AM/heldout_sentiment_scores.csv', 'data/bias_in_AM/heldout_aq_scores.csv']
 
-train_subset, train_feature_df = load_dataframes_new(train_datafile, train_featurefile)
-heldout_subset, heldout_feature_df = load_dataframes_new(heldout_datafile, heldout_featurefile)
+train_subset, train_feature_df = load_dataframes(train_datafile, train_featurefile)
+#heldout_subset, heldout_feature_df = load_dataframes_new(heldout_datafile, heldout_featurefile)
 
-subset = pd.concat([train_subset,heldout_subset], ignore_index=True)
-feature_df = pd.concat([train_feature_df,heldout_feature_df], ignore_index=True)
+#subset = pd.concat([train_subset,heldout_subset], ignore_index=True)
+#feature_df = pd.concat([train_feature_df,heldout_feature_df], ignore_index=True)
 
-feature_df = get_tan_word_features(feature_df)
-subset = pd.merge(subset, feature_df, on='id')
+feature_df = get_tan_word_features(train_feature_df)
+subset = pd.merge(train_subset, feature_df, on='id')
 
 df_acl2022 = get_acl2022_feature_subset(subset)
 
@@ -74,10 +74,9 @@ df = pd.merge(df,comment_info, on='id', how='left')
 
 for x in range(len(train_classifierfeaturefiles)):
     train_df_classifiers = pd.read_csv(train_classifierfeaturefiles[x], sep=',')
-    heldout_df_classifiers = pd.read_csv(heldout_classifierfeaturefiles[x], sep=',')
-    #heldout_df_classifiers = heldout_df_classifiers.drop(columns=['tmp_masked_selftext', 'masked_selftext'])
-    df_classifiers = pd.concat([train_df_classifiers,heldout_df_classifiers], ignore_index=True)
-    df = pd.merge(df, df_classifiers, on='id', how='left')
+    #heldout_df_classifiers = pd.read_csv(heldout_classifierfeaturefiles[x], sep=',')
+    #df_classifiers = pd.concat([train_df_classifiers,heldout_df_classifiers], ignore_index=True)
+    df = pd.merge(df, train_df_classifiers, on='id', how='left')
 
 # add col for the source of the gender info (explicit vs implicit)
 def determine_gender_source(row):
@@ -88,5 +87,8 @@ def determine_gender_source(row):
 
 
 df['gender_source'] = df.apply(determine_gender_source, axis=1)
+
+col_rename_dict = {'flesch': 'flesch_readability', 'gunningFog': 'Gunning_Fog_simplicity', 'ttr': 'token_type_ratio', 'ADV':'adverbs', 'PRON':'personal_pronouns','AUX':'auxiliary', 'SCONJ':'subordinate_conj', 'entities':'named_entities'}
+df = df.rename(columns=col_rename_dict)
 
 df.to_csv('data/bias_in_AM/data_for_analysis.csv', index=False)

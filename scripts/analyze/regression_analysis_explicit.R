@@ -5,12 +5,11 @@ library(MASS)
 library(xtable)
 library(sjmisc)
 library(sjPlot)  
+library(car)
 
 gender_type<-'explicit_gender'
 
 data <- read.csv('data/bias_in_AM/data_for_analysis.csv')
-file_path <- "models_summary_explicit_gender.txt"
-summary_file <- file(file_path, "a")
 
 data$gender_source <- ifelse(data$gender_source == 'explicit', 1.0, 0.0)
 data$sentiment <- ifelse(data$sentiment == 'negative', -1,
@@ -19,7 +18,7 @@ data$sentiment <- ifelse(data$sentiment == 'negative', -1,
 
 # work only with author_gender (not considering explicit gender info)
 df <- data[data$explicit_gender %in% c(0, 1), ]
-df <- subset(df, select = -c(gender_source, author_gender, imperative, PRON, aq_masked_score, masked_selftext_x, masked_selftext_y, tmp_masked_selftext_x, tmp_masked_selftext_y, pdf_link_count, Envy_GALC))
+df <- subset(df, select = -c(gender_source, author_gender, imperative, personal_pronouns, aq_masked_score, pdf_link_count, aq_score, avg_comment_aq, topic, sentiment_positive, toxicity_neutral))
 
 cor_matrix_spearman <- cor(df[, 4:ncol(df)], method = "spearman")
 get_clusters <- function(cor_matrix, threshold) {
@@ -47,11 +46,11 @@ for (cluster_id in unique(clusters)) {
   if (length(colnames(cor_matrix_spearman)[clusters == cluster_id]) > 1){
        list_length <- length(colnames(cor_matrix_spearman)[clusters == cluster_id])
        # Drop either all but first or all but last items in clusters with colinearity
-       if (cluster_id < 86 || cluster_id == 92 ){
-              columns_to_drop <- colnames(cor_matrix_spearman)[clusters == cluster_id][-1]
-       }
-       if (cluster_id == 90 || cluster_id == 98 || cluster_id == 87){ 
+       if (cluster_id == 52 || cluster_id == 58 || cluster_id == 31 || cluster_id == 35 || cluster_id == 20){ 
               columns_to_drop <- colnames(cor_matrix_spearman)[clusters == cluster_id][1:(list_length - 1)]
+       }
+       else if (cluster_id < 49 || cluster_id == 54 ){
+              columns_to_drop <- colnames(cor_matrix_spearman)[clusters == cluster_id][-1]
        }
        df <- df[, !colnames(df) %in% columns_to_drop]
        cat("Cluster", cluster_id, ":\n")
@@ -76,11 +75,14 @@ save_plot_to_pdf <- function(plot, file_name, w, h) {
   dev.off()
 }
 
+file_path <- "models_summary_explicit_gender.txt"
+summary_file <- file(file_path, "a")
 save_summary <- function(model, dependent_var, file_path) {
        writeLines('#######################################################', file_path)
        writeLines(paste('Dependent Variable:',dependent_var), file_path)
        writeLines(capture.output(summary(model)$coef[,0]), file_path)
        writeLines(capture.output(summary(model)), file_path)
+       writeLines(capture.output(vif(model)), file_path)
 }
 
 filter_strings <- c('gender', 'score', 'num_comments')
@@ -96,9 +98,9 @@ for (dependent_var in c('explicit_gender', 'score', 'perc_author_gender_in_comme
        combined_df <- data.frame(cmv_extracted_feats, ling_feats)
        filtered_column_names_ivs_ab <- c(filtered_column_names_ivs_a, colnames(ling_feats))
        if (dependent_var %in% c('explicit_gender','gender_source')){
-              modelA <- glm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_a, collapse = " + ")), data = cmv_extracted_feats, family=binomial)
+              modelA <- glm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_a, collapse = " + "), '+ (score*num_comments)'), data = cmv_extracted_feats, family=binomial)
               stepAICmodelA <- glm(run_stepAIC(modelA), data = cmv_extracted_feats, family=binomial)
-              modelAB <- glm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_ab, collapse = " + ")), data = combined_df, family=binomial)
+              modelAB <- glm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_ab, collapse = " + "), '+ (score*num_comments)'), data = combined_df, family=binomial)
               stepAICmodelAB <- glm(run_stepAIC(modelAB), data = combined_df, family=binomial)
               sig_var <- "Pr(>|z|)"
        } else {

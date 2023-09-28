@@ -5,12 +5,11 @@ library(MASS)
 library(xtable)
 library(sjmisc)
 library(sjPlot)  
+library(car)
 
 gender_type<-'author_gender'
 
 data <- read.csv('data/bias_in_AM/data_for_analysis.csv')
-file_path <- "models_summary_author_gender.txt"
-summary_file <- file(file_path, "a")
 
 data$gender_source <- ifelse(data$gender_source == 'explicit', 1.0, 0.0)
 data$sentiment <- ifelse(data$sentiment == 'negative', -1,
@@ -19,7 +18,12 @@ data$sentiment <- ifelse(data$sentiment == 'negative', -1,
 
 # work only with author_gender (not considering explicit gender info)
 df <- data[data$author_gender %in% c(0, 1), ]
-df <- subset(df, select = -c(explicit_gender, imperative, aq_score, avg_comment_aq, PRON, aq_masked_score, masked_selftext_x, masked_selftext_y, tmp_masked_selftext_x, tmp_masked_selftext_y))
+df <- subset(df, select = -c(explicit_gender, imperative, aq_score, avg_comment_aq, personal_pronouns, aq_masked_score, topic, sentiment_positive, toxicity_neutral))#tokenized_text
+
+# identify cols with zero standard deviation
+#sds <- apply(df[, 4:ncol(df)], 2, sd)
+#zero_sd_vars <- names(sds[sds == 0])
+#print(zero_sd_vars)
 
 cor_matrix_spearman <- cor(df[, 4:ncol(df)], method = "spearman")
 get_clusters <- function(cor_matrix, threshold) {
@@ -47,11 +51,11 @@ for (cluster_id in unique(clusters)) {
   if (length(colnames(cor_matrix_spearman)[clusters == cluster_id]) > 1){
        list_length <- length(colnames(cor_matrix_spearman)[clusters == cluster_id])
        # Drop either all but first or all but last items in clusters with colinearity
-       if (cluster_id < 88 || cluster_id == 95 || cluster_id == 90){
-              columns_to_drop <- colnames(cor_matrix_spearman)[clusters == cluster_id][-1]
-       }
-       if (cluster_id == 93 || cluster_id == 100){ 
+       if (cluster_id == 53 || cluster_id == 59 || cluster_id == 20 || cluster_id == 30 || cluster_id == 34){ 
               columns_to_drop <- colnames(cor_matrix_spearman)[clusters == cluster_id][1:(list_length - 1)]
+       }
+       else if (cluster_id < 50 || cluster_id == 55){
+              columns_to_drop <- colnames(cor_matrix_spearman)[clusters == cluster_id][-1]
        }
        df <- df[, !colnames(df) %in% columns_to_drop]
        cat("Cluster", cluster_id, ":\n")
@@ -81,12 +85,15 @@ save_summary <- function(model, dependent_var, file_path) {
        writeLines(paste('Dependent Variable:',dependent_var), file_path)
        writeLines(capture.output(summary(model)$coef[,0]), file_path)
        writeLines(capture.output(summary(model)), file_path)
+       writeLines(capture.output(summary(model)), file_path)
 }
 
 filter_strings <- c('gender', 'score', 'num_comments')
 filtered_columns <- grep(paste(filter_strings, collapse = '|'), names(subset_df))
 filtered_column_names <- names(subset_df)[filtered_columns]
 
+file_path <- "models_summary_author_gender.txt"
+summary_file <- file(file_path, "a")
 counter<-1
 for (dependent_var in c('author_gender', 'score', 'perc_author_gender_in_comments_m', 'perc_author_gender_in_comments_f')){
        #dependent_var <- 'author_gender'
@@ -97,9 +104,9 @@ for (dependent_var in c('author_gender', 'score', 'perc_author_gender_in_comment
        combined_df <- data.frame(cmv_extracted_feats, ling_feats)
        filtered_column_names_ivs_ab <- c(filtered_column_names_ivs_a, colnames(ling_feats))
        if (dependent_var %in% c('author_gender','gender_source')){
-              modelA <- glm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_a, collapse = " + ", '+ (score*num_comments)')), data = cmv_extracted_feats, family=binomial)
+              modelA <- glm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_a, collapse = " + "), '+ (score*num_comments)'), data = cmv_extracted_feats, family=binomial)
               stepAICmodelA <- glm(run_stepAIC(modelA), data = cmv_extracted_feats, family=binomial)
-              modelAB <- glm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_ab, collapse = " + ", '+ (score*num_comments)')), data = combined_df, family=binomial)
+              modelAB <- glm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_ab, collapse = " + "), '+ (score*num_comments)'), data = combined_df, family=binomial)
               stepAICmodelAB <- glm(run_stepAIC(modelAB), data = combined_df, family=binomial)
               sig_var <- "Pr(>|z|)"
        } else {
@@ -129,6 +136,3 @@ for (dependent_var in c('author_gender', 'score', 'perc_author_gender_in_comment
 }
 close(summary_file)
 
-
-'flesch', 'gunningFog','ttr'
-'flesch_readability_score', 'Gunning Fog simplicity', 'token_type_ratio'
