@@ -48,7 +48,7 @@ def get_tan_word_features(df):
     df['total_words'] = df['tokenized_text'].apply(len)
     df['word_probabilities'] = df['word_frequencies'].apply(lambda x: {word: freq / sum(x.values()) for word, freq in x.items()})
     df['entropy'] = df['word_probabilities'].apply(lambda x: -sum(prob * math.log2(prob) for prob in x.values()))
-    df = df.drop(columns=['word_frequencies','total_words','word_probabilities'])
+    df = df.drop(columns=['word_frequencies','total_words','word_probabilities','tokenized_text'])
     #
     # examples
     df['example_count'] = df['tmp_text'].str.count(r'example', flags=re.IGNORECASE)
