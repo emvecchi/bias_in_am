@@ -78,8 +78,7 @@ data$sentiment <- ifelse(data$sentiment == 'negative', -1,
                               ifelse(data$sentiment == 'positive', 1, NA)))
 
 df <- data[data$author_gender %in% c(0, 1), ]
-df <- subset(df, select = -c(explicit_gender, imperative, aq_score, avg_comment_aq, personal_pronouns, aq_masked_score, topic, sentiment_positive, toxicity_neutral))#tokenized_text
-df[, 4:ncol(df)] <- lapply(df[, 4:ncol(df)], function(x) as.numeric(as.character(x)))
+df <- subset(df, select = -c(explicit_gender, imperative, aq_score, avg_comment_aq, personal_pronouns, aq_masked_score, topic, sentiment_positive, toxicity_neutral))
 
 # identify cols with zero standard deviation
 #sds <- apply(df[, 4:ncol(df)], 2, sd)
