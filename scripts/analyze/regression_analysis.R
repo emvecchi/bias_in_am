@@ -15,12 +15,7 @@ get_clusters <- function(cor_matrix, threshold) {
        }
        hclust_res <- hclust(dist_matrix, method = "ward.D2")
        clusters <- cutree(hclust_res, h = threshold)
-       #pdf("clustering_and_correlation_plots.pdf")
-       #plot(hclust_res, hang = -1,
-       #main = "Hierarchical Clustering of Features (Spearman Correlation)")
-       #corrplot(cor_matrix, method = "color")
-       #dev.off()
-       #return(clusters)
+       return(clusters)
 }
 
 run_stepAIC <- function(model) {
@@ -48,8 +43,10 @@ save_summary <- function(model, dependent_var, file_path) {
        writeLines(capture.output(summary(model)$coef[,0]), file_path)
        writeLines(capture.output(summary(model)), file_path)
        writeLines(capture.output(vif(model)), file_path)
-       fit <- get_explained_variance(model)
-       writeLines(capture.output(fit[order(fit$explvar, decreasing = TRUE),]))
+       if (dependent_var != 'author_gender'){
+              fit <- get_explained_variance(model)
+              writeLines(capture.output(fit[order(fit$explvar, decreasing = TRUE),]))
+       }
 }
 
 update_df_for_colinearity <- function(clusters, cor_matrix_spearman, df) {
