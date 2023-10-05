@@ -54,11 +54,13 @@ update_df_for_colinearity <- function(clusters, cor_matrix_spearman, df) {
               if (length(colnames(cor_matrix_spearman)[clusters == cluster_id]) > 1){
                      list_length <- length(colnames(cor_matrix_spearman)[clusters == cluster_id])
                      # Drop either all but first or all but last items in clusters with colinearity
-                     if (cluster_id == 52 || cluster_id == 58 || cluster_id == 31 || cluster_id == 35 || cluster_id == 20){ 
-                     columns_to_drop <- colnames(cor_matrix_spearman)[clusters == cluster_id][1:(list_length - 1)]
+                     if (cluster_id == 13 || cluster_id == 57 || cluster_id == 63 || cluster_id == 30){ 
+                     #if (cluster_id == 52 || cluster_id == 58 || cluster_id == 31 || cluster_id == 35 || cluster_id == 20){ 
+                            columns_to_drop <- colnames(cor_matrix_spearman)[clusters == cluster_id][1:(list_length - 1)]
                      }
-              else if (cluster_id < 49 || cluster_id == 54 ){
-                     columns_to_drop <- colnames(cor_matrix_spearman)[clusters == cluster_id][-1]
+                     else if (cluster_id < 54 || cluster_id == 59 ){
+                     #else if (cluster_id < 49 || cluster_id == 54 ){
+                            columns_to_drop <- colnames(cor_matrix_spearman)[clusters == cluster_id][-1]
                      }
               df <- df[, !colnames(df) %in% columns_to_drop]
               cat("Cluster", cluster_id, ":\n")
@@ -69,14 +71,16 @@ update_df_for_colinearity <- function(clusters, cor_matrix_spearman, df) {
 }
 
 
-data <- read.csv('data/bias_in_AM/data_for_analysis.csv')
+data <- read.csv('data/bias_in_AM/data_for_analysis2.csv')
 data$gender_source <- ifelse(data$gender_source == 'explicit', 1.0, 0.0)
 data$sentiment <- ifelse(data$sentiment == 'negative', -1,
                        ifelse(data$sentiment == 'neutral', 0,
                               ifelse(data$sentiment == 'positive', 1, NA)))
 
 df <- data[data$explicit_gender %in% c(0, 1), ]
-df <- subset(df, select = -c(gender_source, author_gender, imperative, personal_pronouns, aq_masked_score, pdf_link_count, aq_score, avg_comment_aq, topic, sentiment_positive, toxicity_neutral))
+# remove cols that are irrelevant (eg gender_source, *aq*) or those with zero standard deviation (eg pdf_link_count, imperative, PRON)
+#df <- subset(df, select = -c(gender_source, author_gender, imperative, personal_pronouns, aq_masked_score, pdf_link_count, aq_score, avg_comment_aq, topic, sentiment_positive, toxicity_neutral))
+df <- subset(df, select = -c(gender_source, author_gender, personal_pronouns, aq_masked_score, pdf_link_count, aq_score, avg_comment_aq, topic, sentiment_positive, toxicity_neutral))
 
 cor_matrix_spearman <- cor(df[, 4:ncol(df)], method = "spearman")
 
@@ -95,7 +99,7 @@ filtered_column_names <- names(df)[filtered_columns]
 file_path <- "models_summary_explicit_gender.txt"
 summary_file <- file(file_path, "a")
 counter<-1
-for (dependent_var in c('explicit_gender', 'score', 'perc_author_gender_in_comments_m', 'perc_author_gender_in_comments_f')){
+for (dependent_var in c('explicit_gender', 'score', 'perc_explicit_gender_in_comments_m', 'perc_explicit_gender_in_comments_f')){
        filtered_column_names_ivs_a <- setdiff(filtered_column_names, dependent_var)
        cmv_extracted_feats <- subset(df, select=c(filtered_column_names))
        ling_feats <- subset(df, select= -filtered_columns)
@@ -126,7 +130,7 @@ for (dependent_var in c('explicit_gender', 'score', 'perc_author_gender_in_comme
               width = 0.1, value.size = 3, dot.size =.5, sort.est = TRUE, 
               terms = c(rownames(significant_featuresAB)), 
               title = '') + theme_sjplot()
-       save_plot_to_pdf(plotAB, paste('groupab_',counter,'.pdf', sep=''), 5, 4)
+       save_plot_to_pdf(plotAB, paste('groupab_',counter,'.pdf', sep=''), 4, 3)
        print(summary(stepAICmodelA))
        save_summary(stepAICmodelA, dependent_var, summary_file)
        print(summary(stepAICmodelAB))

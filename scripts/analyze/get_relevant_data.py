@@ -90,4 +90,4 @@ df['gender_source'] = df.apply(determine_gender_source, axis=1)
 col_rename_dict = {'flesch': 'flesch_readability', 'gunningFog': 'Gunning_Fog_simplicity', 'ttr': 'token_type_ratio', 'ADV':'adverbs', 'PRON':'personal_pronouns','AUX':'auxiliary', 'SCONJ':'subordinate_conj', 'entities':'named_entities'}
 df = df.rename(columns=col_rename_dict)
 
-df.to_csv('data/bias_in_AM/data_for_analysis.csv', index=False)
+df.to_csv('data/bias_in_AM/data_for_analysis2.csv', index=False)

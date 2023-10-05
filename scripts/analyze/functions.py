@@ -216,6 +216,31 @@ def load_dataframes_new(datafile, featurefile):
     return(subset, feature_df)
 
 def get_acl2022_feature_subset(df):
+    acl2022_features = ['flesch', 'negative_adjectives_component',
+                            'positive_nouns_component', 'AUX', 
+                            'entities', 'nwords',
+                            'SCONJ', 'failure_component',
+                            'well_being_component', 'positive_adjectives_component', 
+                            'trust_verbs_component', 'affect_friends_and_family_component', 
+                            'polarity_nouns_component', 'respect_component',
+                            'politeness_component', 'economy_component', 
+                            'polarity_verbs_component', 'positive_verbs_component', 
+                            'past_tense', 'lsa_average_top_three_cosine',
+                            'virtue_adverbs_component', 'certainty_component',
+                            'social_order_component', 'action_component',
+                            'hyper_verb_noun_Sav_Pav', 'All_AWL_Normed',
+                            'McD_CD', 'content_poly', 'COCA_spoken_Bigram_Frequency', 
+                            'COCA_spoken_Frequency_AW', 'Brysbaert_Concreteness_Combined_AW', 
+                            'mattr50_aw', 'mtld_original_aw', 'LD_Mean_Accuracy',
+                            'PRON', 'ADV', 'objects_component', 'gunningFog',
+                            'WN_Mean_Accuracy', 'Anger_EmoLex', 'Anticipation_EmoLex', 'Disgust_EmoLex',
+                            'Fear_EmoLex', 'Joy_EmoLex', 'Negative_EmoLex', 'Positive_EmoLex', 'Sadness_EmoLex',
+                            'Surprise_EmoLex', 'Trust_EmoLex', 'Dominance', 'Dominance_nwords', 'pleasantness',
+                            'attention', 'sensitivity', 'aptitude', 'polarity']
+    feature_subset = df[['id','text','type']+acl2022_features]
+    return(feature_subset)   
+
+def get_acl2022_feature_subset2(df):
     acl2022_features=['mtld_original_aw',
                     'mattr50_aw',
                     'hdd42_aw',

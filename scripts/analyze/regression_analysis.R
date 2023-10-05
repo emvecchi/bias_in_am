@@ -54,11 +54,13 @@ update_df_for_colinearity <- function(clusters, cor_matrix_spearman, df) {
               if (length(colnames(cor_matrix_spearman)[clusters == cluster_id]) > 1){
                      list_length <- length(colnames(cor_matrix_spearman)[clusters == cluster_id])
                      # Drop either all but first or all but last items in clusters with colinearity
-                     if (cluster_id == 53 || cluster_id == 59 || cluster_id == 20 || cluster_id == 30 || cluster_id == 34){ 
-                     columns_to_drop <- colnames(cor_matrix_spearman)[clusters == cluster_id][1:(list_length - 1)]
+                     if (cluster_id == 14 || cluster_id == 41 || cluster_id == 57 || cluster_id == 63){ 
+                     #if (cluster_id == 53 || cluster_id == 59 || cluster_id == 20 || cluster_id == 30 || cluster_id == 34){ 
+                            columns_to_drop <- colnames(cor_matrix_spearman)[clusters == cluster_id][1:(list_length - 1)]
                      }
-              else if (cluster_id < 50 || cluster_id == 55 ){
-                     columns_to_drop <- colnames(cor_matrix_spearman)[clusters == cluster_id][-1]
+                     else if (cluster_id < 54 || cluster_id == 59 ){
+                     #else if (cluster_id < 50 || cluster_id == 55 ){
+                            columns_to_drop <- colnames(cor_matrix_spearman)[clusters == cluster_id][-1]
                      }
               df <- df[, !colnames(df) %in% columns_to_drop]
               cat("Cluster", cluster_id, ":\n")
@@ -68,14 +70,16 @@ update_df_for_colinearity <- function(clusters, cor_matrix_spearman, df) {
        return(df)
 }
 
-data <- read.csv('data/bias_in_AM/data_for_analysis.csv')
+data <- read.csv('data/bias_in_AM/data_for_analysis2.csv')
 data$gender_source <- ifelse(data$gender_source == 'explicit', 1.0, 0.0)
 data$sentiment <- ifelse(data$sentiment == 'negative', -1,
                        ifelse(data$sentiment == 'neutral', 0,
                               ifelse(data$sentiment == 'positive', 1, NA)))
 
 df <- data[data$author_gender %in% c(0, 1), ]
-df <- subset(df, select = -c(explicit_gender, imperative, aq_score, avg_comment_aq, personal_pronouns, aq_masked_score, topic, sentiment_positive, toxicity_neutral))
+# remove cols that are irrelevant (eg gender_source, *aq*) or those with zero standard deviation (eg pdf_link_count, imperative, PRON)
+#df <- subset(df, select = -c(explicit_gender, imperative, aq_score, avg_comment_aq, personal_pronouns, aq_masked_score, topic, sentiment_positive, toxicity_neutral))
+df <- subset(df, select = -c(explicit_gender, aq_score, avg_comment_aq, personal_pronouns, aq_masked_score, topic, sentiment_positive, toxicity_neutral))
 
 # identify cols with zero standard deviation
 #sds <- apply(df[, 4:ncol(df)], 2, sd)
