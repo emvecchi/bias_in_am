@@ -104,7 +104,7 @@ data$sentiment <- ifelse(data$sentiment == 'negative', -1,
                               ifelse(data$sentiment == 'positive', 1, NA)))
 
 df <- data[data$author_gender %in% c(0, 1), ]
-# remove cols that are irrelevant (eg gender_source, *aq*) or those with zero standard deviation (eg pdf_link_count, imperative, PRON)
+# remove cols that are irrelevant here (eg explicit_gender, *aq*) or those with zero standard deviation (eg pdf_link_count, imperative, personal_pronoun)
 df <- subset(df, select = -c(explicit_gender, aq_score, avg_comment_aq, personal_pronouns, aq_masked_score, topic, sentiment_positive, toxicity_neutral, deltas, avg_comment_deltas, author_flair_text))
 
 # identify cols with zero standard deviation
