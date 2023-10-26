@@ -144,6 +144,7 @@ for (dependent_var in c('CMVGender', 'score', 'CMVGender_in_comments_m', 'CMVGen
               pR2A = 1 - stepAICmodelA$deviance / stepAICmodelA$null.deviance 
               modelAB <- glm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_ab, collapse = " + "), '+ (score*num_comments)'), data = combined_df, family=binomial)
               stepAICmodelAB <- glm(run_stepAIC(modelAB), data = combined_df, family=binomial)
+              pR2AB = 1 - stepAICmodelAB$deviance / stepAICmodelAB$null.deviance 
        } else {
               modelA <- lm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_a, collapse = " + ")), data = cmv_extracted_feats)
               stepAICmodelA <- lm(run_stepAIC_interaction(modelA), data = cmv_extracted_feats)
@@ -153,7 +154,7 @@ for (dependent_var in c('CMVGender', 'score', 'CMVGender_in_comments_m', 'CMVGen
        significant_featuresA <- summary(stepAICmodelA)$coefficients[summary(stepAICmodelA)$coefficients[, 4] < 0.01, ]
        plotA<-get_plot(stepAICmodelA, significant_featuresA, dependent_var)
        save_plot_to_pdf(plotA, paste('groupa_',counter,'.pdf', sep=''), 6, 3)
-       significant_featuresAB <- summary(stepAICmodelAB)$coefficients[summary(stepAICmodelAB)$coefficients[, 5] < 0.05, ]
+       significant_featuresAB <- summary(stepAICmodelAB)$coefficients[summary(stepAICmodelAB)$coefficients[, 4] < 0.05, ]
        plotAB<-get_plot(stepAICmodelAB, significant_featuresAB, dependent_var)
        save_plot_to_pdf(plotAB, paste('groupab_',counter,'.pdf', sep=''), 8, 5.5)
        print(summary(stepAICmodelA))
