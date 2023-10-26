@@ -288,43 +288,6 @@ def get_acl2022_feature_subset2(df):
                     'NOUN',
                     'VERB',
                     'complex_words',
-                    #'Amusement_GALC',
-                    #'Anger_GALC',
-                    #'Anxiety_GALC',
-                    #'Beingtouched_GALC',
-                    #'Boredom_GALC',
-                    #'Compassion_GALC',
-                    #'Contempt_GALC',
-                    #'Contentment_GALC',
-                    #'Desperation_GALC',
-                    #'Disappointment_GALC',
-                    #'Disgust_GALC',
-                    #'Dissatisfaction_GALC',
-                    #'Envy_GALC',
-                    #'Fear_GALC',
-                    #'Feelinglove_GALC',
-                    #'Gratitude_GALC',
-                    #'Guilt_GALC',
-                    #'Happiness_GALC',
-                    #'Hatred_GALC',
-                    #'Hope_GALC',
-                    #'Humility_GALC',
-                    #'Interest/Enthusiasm_GALC',
-                    #'Irritation_GALC',
-                    #'Jealousy_GALC',
-                    #'Joy_GALC',
-                    #'Longing_GALC',
-                    #'Lust_GALC',
-                    #'Pleasure/Enjoyment_GALC',
-                    #'Pride_GALC',
-                    #'Relaxation/Serenity_GALC',
-                    #'Relief_GALC',
-                    #'Sadness_GALC',
-                    #'Shame_GALC',
-                    #'Surprise_GALC',
-                    #'Tension/Stress_GALC',
-                    #'Positive_GALC',
-                    #'Negative_GALC',
                     'Anger_EmoLex',
                     'Anticipation_EmoLex',
                     'Disgust_EmoLex',
@@ -342,23 +305,6 @@ def get_acl2022_feature_subset2(df):
                     'sensitivity',
                     'aptitude',
                     'polarity']
-                    #'vader_negative',
-                    #'vader_neutral',
-                    #'vader_positive',
-                    #'vader_compound',
-                    #'COCA_spoken_Bigram_Frequency',
-                    #'COCA_spoken_Frequency_AW',
-                    #'COCA_spoken_Range_AW',
-                    #'COCA_spoken_bi_MI2',
-                    #'All_AWL_Normed',
-                    #'WN_Mean_Accuracy',
-                    #'LD_Mean_Accuracy',
-                    #'LD_Mean_RT',
-                    #'MRC_Familiarity_AW',
-                    #'MRC_Imageability_AW',
-                    #'Brysbaert_Concreteness_Combined_AW',
-                    #'content_poly',
-                    #'hyper_verb_noun_Sav_Pav']
     feature_subset = df[['id','text','type']+acl2022_features]
     return(feature_subset)
 
@@ -368,10 +314,6 @@ def get_feature_hierarch_correlations(df, correlation_threshold, outfile):
     import matplotlib.pyplot as plt
     from scipy.cluster import hierarchy
     correlation_matrix = df.iloc[:, 4:].corr(method='spearman')
-    #plt.figure(figsize=(12, 10))
-    #sns.heatmap(correlation_matrix, annot=True, fmt=".2f", cmap="coolwarm")
-    #plt.title("Pairwise Spearman Correlation")
-    #plt.savefig('correlation_matrix.png')
     distance_matrix = 1 - correlation_matrix.abs()
     linkage = hierarchy.linkage(distance_matrix, method='complete')
     plt.figure(figsize=(20, 15))
