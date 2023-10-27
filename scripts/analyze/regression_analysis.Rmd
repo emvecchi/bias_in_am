@@ -1,0 +1,285 @@
+---
+title: "regression_analysis"
+output: html_notebook
+---
+
+```{r}
+library(stats)
+library(corrplot)
+library(dplyr)
+library(MASS)
+library(sjmisc)
+library(sjPlot)  
+library(car)
+library(ggplot2)
+require(rms)
+```
+
+```{r, include=FALSE}
+data <- read.csv('../../data/lrec2024_data.no_preprocess.csv')
+
+df <- data[data$author_gender %in% c(0, 1), ]
+# remove cols that are irrelevant here (eg explicit_gender, *aq*) or those with zero standard deviation (eg pdf_link_count, imperative, personal_pronoun)
+df <- subset(df, select = -c(aq_score, avg_comment_aq, personal_pronouns, aq_masked_score, topic, pdf_link_count, sentiment_positive, toxicity_neutral, deltas, avg_comment_deltas, author_flair_text))
+df <- df %>% 
+       rename("extCMVGender" = "author_gender",
+              "CMVGender" = "explicit_gender",
+               "extCMVGender_in_comments_f" = "perc_author_gender_in_comments_f",
+               "extCMVGender_in_comments_m"= "perc_author_gender_in_comments_m",
+               "CMVGender_in_comments_m" = "perc_explicit_gender_in_comments_m",
+               "CMVGender_in_comments_f" = "perc_explicit_gender_in_comments_f",
+               "edited" = "edited_binary",
+               "Lex_Decision_Accuracy" = "LD_Mean_Accuracy",
+               "hypernomy_verb_noun" = "hyper_verb_noun_Sav_Pav",
+               "KL_divergence_rel_entropy" = "McD_CD"
+               )
+write.csv(df,'../../data/lrec2024_data.csv', row.names = FALSE)
+```
+
+### Load LREC-2014 Data for Analysis
+Preprocess gender_source,sentiment values
+```{r}
+data <- read.csv('../../data/lrec2024_data.csv')
+
+# gender_source values: explicit mentions:1; extended gender:0
+data$gender_source <- ifelse(data$gender_source == 'explicit', 1.0, 0.0)
+data$sentiment <- ifelse(data$sentiment == 'negative', -1,
+                       ifelse(data$sentiment == 'neutral', 0,
+                              ifelse(data$sentiment == 'positive', 1, NA)))
+
+```
+
+### Sanity check
+Print cols with standard deviation = 0
+```{r}
+sds <- apply(data[, 4:ncol(data)], 2, sd)
+names(sds[sds == 0])
+```
+
+## Colinearity Check
+ 1. Run hierarchical clustering on all features 
+ 2. Return clusters with a Spearman correlation higher than threshold = 0.5
+```{r}
+get_clusters <- function(cor_matrix, threshold) {
+       dist_matrix <- as.dist(1 - cor_matrix)
+       if (any(is.na(dist_matrix)) || any(is.infinite(dist_matrix))) {
+              dist_matrix[is.na(dist_matrix)] <- mean(dist_matrix, na.rm = TRUE)
+              dist_matrix[is.infinite(dist_matrix)] <- mean(dist_matrix, na.rm = TRUE)
+       }
+       hclust_res <- hclust(dist_matrix, method = "ward.D2")
+       clusters <- cutree(hclust_res, h = threshold)
+       return(clusters)
+}
+
+cor_matrix_spearman <- cor(data[, 4:ncol(data)], method = "spearman")
+correlation_threshold <- 0.5       # correlation threshold for colinearity check
+clusters <- get_clusters(cor_matrix_spearman, correlation_threshold)
+```
+
+ 3. Update data: select only one feature from each high colinearity cluster
+```{r}
+update_data_for_colinearity <- function(clusters, cor_matrix_spearman, data) {
+       for (cluster_id in unique(clusters)) {
+              if (length(colnames(cor_matrix_spearman)[clusters == cluster_id]) > 1){
+                     list_length <- length(colnames(cor_matrix_spearman)[clusters == cluster_id])
+                     # Drop either all but first or all but last items in clusters with colinearity
+                     if (cluster_id == 13 || cluster_id == 57 || cluster_id == 63){ 
+                            columns_to_drop <- colnames(cor_matrix_spearman)[clusters == cluster_id][1:(list_length - 1)]
+                     }
+                     else if ( (cluster_id !=29 && cluster_id < 53) || cluster_id == 59 ){
+                            columns_to_drop <- colnames(cor_matrix_spearman)[clusters == cluster_id][-1]
+                     }
+              data <- data[, !colnames(data) %in% columns_to_drop]
+              cat("Cluster", cluster_id, ":\n")
+              cat(colnames(cor_matrix_spearman)[clusters == cluster_id], "\n\n")
+              }
+       }
+       return(data)
+}
+data <- update_data_for_colinearity(clusters, cor_matrix_spearman, data)
+colnames(data)
+```
+## Function Definition
+### 1. Model Selection
+- StepAIC without interactions
+```{r}
+run_stepAIC <- function(model) {
+       result_stepAIC <- stepAIC(model, trace=FALSE)       
+       model_formula <- formula(result_stepAIC$call)
+       return(model_formula)
+}
+```
+
+- StepAIC with all interactions checked
+```{r}
+run_stepAIC_interaction <- function(model) {
+       result_stepAIC <- stepAIC(model, scope = . ~ .^2, trace=FALSE)       
+       model_formula <- formula(result_stepAIC$call)
+       return(model_formula)
+}
+```
+
+### 2. Fit 
+- Retrieve explained variance table
+```{r}
+get_explained_variance <- function(model, dependent_var){
+       fit <- suppressWarnings(anova(model))
+       if (dependent_var %in% c('extCMVGender','CMVGender')) {
+              explained_variance <- (fit[["Deviance" ]]/deviance(model))*100
+       } else {
+              explained_variance <-(fit[["Sum Sq" ]]/sum(fit[["Sum Sq" ]]))*100
+       }
+       fit$explvar <- explained_variance
+       return(fit)
+}
+```
+
+### 3. Plot
+- Return plot a-la LREC-2024 format
+```{r}
+get_plot <- function(model, significant_features, dependent_var, iv_name){
+       suppressWarnings(plot<-plot_model(model, type = 'std', sort.est = TRUE, 
+              show.values = TRUE, width = 0.01, 
+              vline.color="black", terms = c(rownames(significant_features))) + 
+              theme(
+                     text = element_text(size = 10),
+                     axis.text.y = element_text(size = 15),
+                     panel.background = element_rect(fill = 'white', color = 'white'),
+                     strip.text = element_text(size = 15), # Set text size for the strip (above the plot)
+                     strip.background = element_blank(),    # Remove background for the strip
+                     strip.text.x = element_text(hjust = 0), # Adjust horizontal alignment of strip text
+                     panel.grid.major = element_line(color = "gray", linetype = "dashed"), # Add major grid lines
+                     panel.grid.minor = element_blank()
+                     ) +
+              labs(title = paste(dependent_var," ~ ",iv_name)))  # Custom title above the grid plot
+       return(plot)
+}
+```
+
+
+# DV: CMVGender 
+```{r}
+dependent_var <- 'CMVGender'
+
+df_CMVGender <- data[data$CMVGender %in% c(0, 1), ] # for dealing with known CMVGender subset
+df_CMVGender <- subset(df_CMVGender, select = -c(extCMVGender, gender_source, 
+                      COCA_spoken_Frequency_AW, Brysbaert_Concreteness_Combined_AW))
+filtered_columns <- grep(paste(c('ender', 'score', 'num_comments'), collapse = '|'), names(df_CMVGender))
+filtered_column_names <- names(df_CMVGender)[filtered_columns]
+filtered_column_names_ivs_a <- setdiff(filtered_column_names, dependent_var)
+cmv_features <- subset(df_CMVGender, select=c(filtered_column_names))
+ling_feats <- subset(df_CMVGender, select= -filtered_columns)
+ling_feats <- ling_feats[, 4:ncol(ling_feats)]
+combined_df <- data.frame(cmv_features, ling_feats)
+filtered_column_names_ivs_ab <- c(filtered_column_names_ivs_a, colnames(ling_feats))
+```
+### 1. CMVGender ~ CMV Features
+```{r}
+modelCMV <- glm(formula = paste(dependent_var, ' ~ ', 
+              paste(filtered_column_names_ivs_a, collapse = " + ")), 
+              data = cmv_features, family=binomial)
+stepAICmodelCMV <- suppressWarnings(glm(run_stepAIC_interaction(modelCMV), data = cmv_features, family=binomial))
+summary(stepAICmodelCMV)
+pR2_CMV = 1 - stepAICmodelCMV$deviance / stepAICmodelCMV$null.deviance 
+print(paste('Pseudo R2: ',pR2_CMV))
+fit <- get_explained_variance(stepAICmodelCMV, dependent_var)
+print(fit[order(fit$explvar, decreasing = TRUE),])
+significant_featuresCMV <- summary(stepAICmodelCMV)$coefficients[summary(stepAICmodelCMV)$coefficients[, 4] < 0.05, ]
+significant_featuresCMV <- significant_featuresCMV[!rownames(significant_featuresCMV) %in% rownames(significant_featuresCMV)[grep(":|\\*", rownames(significant_featuresCMV))], ]
+get_plot(stepAICmodelCMV, significant_featuresCMV, dependent_var, 'CMV Features')
+```
+### 2. CMVGender ~ CMV Features + Textual Features
+```{r}
+modelCombo <- glm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_ab, collapse = " + "), '+ (score*num_comments)'), data = combined_df, family=binomial)
+stepAICmodelCombo <- glm(run_stepAIC(modelCombo), data = combined_df, family=binomial)
+summary(stepAICmodelCombo)
+pR2_Combo = 1 - stepAICmodelCombo$deviance / stepAICmodelCombo$null.deviance 
+print(paste('Pseudo R2: ',pR2_Combo))
+fit <- get_explained_variance(stepAICmodelCombo, dependent_var)
+print(fit[order(fit$explvar, decreasing = TRUE),])
+significant_featuresCombo <- summary(stepAICmodelCombo)$coefficients[summary(stepAICmodelCombo)$coefficients[, 4] < 0.05, ]
+get_plot(stepAICmodelCombo, significant_featuresCombo, dependent_var, 'CMV & Textual Features')
+```
+
+
+# DV: extCMVGender 
+```{r}
+dependent_var <- 'extCMVGender' 
+
+df <- subset(data, select = -c(CMVGender)) # remove explicit gender col (NAN error)
+filtered_columns <- grep(paste(c('ender', 'score', 'num_comments'), collapse = '|'), names(df))
+filtered_column_names <- names(df)[filtered_columns]
+
+filtered_column_names_ivs_a <- setdiff(filtered_column_names, dependent_var)
+cmv_features <- subset(df, select=c(filtered_column_names))
+ling_feats <- subset(df, select= -filtered_columns)
+ling_feats <- ling_feats[, 4:ncol(ling_feats)]
+combined_df <- data.frame(cmv_features, ling_feats)
+filtered_column_names_ivs_ab <- c(filtered_column_names_ivs_a, colnames(ling_feats))
+```
+
+### 1. extCMVGender ~ CMV Features
+```{r}
+modelCMV <- glm(formula = paste(dependent_var, ' ~ ', 
+              paste(filtered_column_names_ivs_a, collapse = " + "), '+ (score*num_comments)'), 
+              data = cmv_features, family=binomial)
+stepAICmodelCMV <- suppressWarnings(glm(run_stepAIC_interaction(modelCMV), data = cmv_features, family=binomial))
+summary(stepAICmodelCMV)
+pR2_CMV = 1 - stepAICmodelCMV$deviance / stepAICmodelCMV$null.deviance 
+print(paste('Pseudo R2: ',pR2_CMV))
+fit <- get_explained_variance(stepAICmodelCMV, dependent_var)
+print(fit[order(fit$explvar, decreasing = TRUE),])
+significant_featuresCMV <- summary(stepAICmodelCMV)$coefficients[summary(stepAICmodelCMV)$coefficients[, 4] < 0.01, ]
+get_plot(stepAICmodelCMV, significant_featuresCMV, dependent_var, 'CMV Features')
+```
+### 2. extCMVGender ~ CMV Features + Textual Features
+```{r}
+modelCombo <- glm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_ab, collapse = " + "), '+ (score*num_comments)'), data = combined_df, family=binomial)
+stepAICmodelCombo <- glm(run_stepAIC(modelCombo), data = combined_df, family=binomial)
+summary(stepAICmodelCombo)
+pR2_Combo = 1 - stepAICmodelCombo$deviance / stepAICmodelCombo$null.deviance 
+print(paste('Pseudo R2: ',pR2_Combo))
+fit <- get_explained_variance(stepAICmodelCombo, dependent_var)
+print(fit[order(fit$explvar, decreasing = TRUE),])
+significant_featuresCombo <- summary(stepAICmodelCombo)$coefficients[summary(stepAICmodelCombo)$coefficients[, 4] < 0.05, ]
+get_plot(stepAICmodelCombo, significant_featuresCombo, dependent_var, 'CMV & Textual Features')
+```
+
+# DV: score 
+```{r}
+dependent_var <- 'score' 
+
+df <- subset(data, select = -c(CMVGender)) # remove explicit gender col (NAN error)
+filtered_columns <- grep(paste(c('ender', 'score', 'num_comments'), collapse = '|'), names(df))
+filtered_column_names <- names(df)[filtered_columns]
+filtered_column_names_ivs_a <- setdiff(filtered_column_names, dependent_var)
+cmv_features <- subset(df, select=c(filtered_column_names))
+ling_feats <- subset(df, select= -filtered_columns)
+ling_feats <- ling_feats[, 4:ncol(ling_feats)]
+combined_df <- data.frame(cmv_features, ling_feats)
+filtered_column_names_ivs_ab <- c(filtered_column_names_ivs_a, colnames(ling_feats))
+```
+
+### 1. score ~ CMV Features
+```{r}
+modelCMV <- lm(formula = paste(dependent_var, ' ~ ', 
+              paste(filtered_column_names_ivs_a, collapse = " + ")), 
+              data = cmv_features)
+stepAICmodelCMV <- suppressWarnings(lm(run_stepAIC_interaction(modelCMV), data = cmv_features))
+summary(stepAICmodelCMV)
+fit <- get_explained_variance(stepAICmodelCMV, dependent_var)
+print(fit[order(fit$explvar, decreasing = TRUE),])
+significant_featuresCMV <- summary(stepAICmodelCMV)$coefficients[summary(stepAICmodelCMV)$coefficients[, 4] < 0.01, ]
+significant_featuresCMV <- significant_featuresCMV[!rownames(significant_featuresCMV) %in% rownames(significant_featuresCMV)[grep(":|\\*", rownames(significant_featuresCMV))], ]
+get_plot(stepAICmodelCMV, significant_featuresCMV, dependent_var, 'CMV Features')
+```
+### 2. extCMVGender ~ CMV Features + Textual Features
+```{r}
+modelCombo <- lm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_ab, collapse = " + ")), data = combined_df)
+stepAICmodelCombo <- lm(run_stepAIC(modelCombo), data = combined_df)
+summary(stepAICmodelCombo)
+fit <- get_explained_variance(stepAICmodelCombo, dependent_var)
+print(fit[order(fit$explvar, decreasing = TRUE),])
+significant_featuresCombo <- summary(stepAICmodelCombo)$coefficients[summary(stepAICmodelCombo)$coefficients[, 4] < 0.05, ]
+get_plot(stepAICmodelCombo, significant_featuresCombo, dependent_var, 'CMV & Textual Features')
+```
