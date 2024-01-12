@@ -196,7 +196,7 @@ run_stepAIC_interaction <- function(model) {
 
 ### 2. Fit
 
-- Retrieve explained variance table
+- Retrieve table of explained variance
 
 ``` r
 get_explained_variance <- function(model, dependent_var){
@@ -213,7 +213,7 @@ get_explained_variance <- function(model, dependent_var){
 
 ### 3. Plot
 
-- Return plot a-la LREC-2024 format
+- Return plot *a-la* LREC-2024
 
 ``` r
 get_plot <- function(model, significant_features, dependent_var, iv_name){
@@ -235,7 +235,7 @@ get_plot <- function(model, significant_features, dependent_var, iv_name){
 }
 ```
 
-# DV: CMVGender
+# DepVar: CMVGender
 
 ``` r
 dependent_var <- 'CMVGender'
@@ -467,7 +467,7 @@ get_plot(stepAICmodelCombo, significant_featuresCombo, dependent_var, 'CMV & Tex
 
 ![](regression_analysis_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
-# DV: extCMVGender
+# DepVar: extCMVGender
 
 ``` r
 dependent_var <- 'extCMVGender' 
@@ -685,7 +685,7 @@ get_plot(stepAICmodelCombo, significant_featuresCombo, dependent_var, 'CMV & Tex
 
 ![](regression_analysis_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
-# DV: score
+# DepVar: score
 
 ``` r
 dependent_var <- 'score' 
