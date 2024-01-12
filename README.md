@@ -11,3 +11,11 @@
 * sklearn
 * statsmodels
 * lark
+
+## References
+
+When using any of the data provided in this repository, please cite the following papers:
+
+* Agnieszka Falenska, Eva Maria Vecchi, and Gabriella Lapesa. *Under Review*. **Self-reported demographics and discourse dynamics in a persuasive online forum**. 
+* Chenhao Tan, Vlad Niculae, Cristian Danescu-Niculescu-Mizil, and Lillian Lee. 2016. **Winning arguments: Interaction dynamics and persuasion strategies in good-faith online discussions**. In Proceedings of the 25th International Conference on World Wide Web, WWW ’16, page 613–
+624, Republic and Canton of Geneva, CHE.
