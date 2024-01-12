@@ -126,6 +126,9 @@ data <- update_data_for_colinearity(clusters, cor_matrix_spearman, data)
     ## sentiment_neutral sentiment_negative sentiment
 
 ``` r
+
+## Full set of [cleaned] features for analysis in dataset
+
 colnames(data)
 ```
 
