@@ -1,7 +1,7 @@
 regression_analysis
 ================
 
-### Load LREC-2014 Data for Analysis
+### Load Tan et al. LREC-2014 Data for Analysis
 
 Preprocess gender_source,sentiment values
 
@@ -124,6 +124,10 @@ data <- update_data_for_colinearity(clusters, cor_matrix_spearman, data)
     ## 
     ## Cluster 63 :
     ## sentiment_neutral sentiment_negative sentiment
+
+
+
+## Full set of [cleaned] features for analysis in dataset
 
 ``` r
 colnames(data)
