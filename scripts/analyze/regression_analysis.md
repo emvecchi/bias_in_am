@@ -1,7 +1,7 @@
 regression_analysis
 ================
 
-### Load Tan et al. LREC-2014 Data for Analysis
+### Load Falenska et al. LREC-2024 Data for Analysis
 
 Preprocess gender_source,sentiment values
 
