@@ -18,7 +18,7 @@ cat $PROJPATH/manual_annotations/* > $explicit_gender
 authors_gender=$INT_DATA/authors_gender.txt
 
 if [ ! -e $authors_gender ]; then
-    python $CMD/preprocess/find_authors_gender.py $data_file $explicit_gender $authors_gender
+    python $CMD/preprocess/explicit_to_implici.py $data_file $explicit_gender $authors_gender
 fi
 
 ## Topics
