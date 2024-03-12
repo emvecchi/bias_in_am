@@ -40,5 +40,5 @@ topics_file=$PROJPATH/annotations/topics.txt
 ann_file=$DATA/cmv.annotations.topics.jsonlist
 if [ ! -e $ann_file ]; then
     python $CMD/preprocess/merge_annotations.py $data_file $explicit_gender $authors_gender $topics_file $ann_file
-    rm $data_file
+rm $data_file
 fi

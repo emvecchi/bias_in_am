@@ -19,7 +19,7 @@ fi
 
 ## Filtering authors' gender
 explicit_gender=$PROJPATH/annotations/explicit_gender.txt
-cat $PROJPATH/manual_annotations/* > $explicit_gender
+cat $PROJPATH/manual_annotations/*explicit_gender.txt > $explicit_gender
 
 authors_gender=$PROJPATH/annotations/authors_gender.txt
 

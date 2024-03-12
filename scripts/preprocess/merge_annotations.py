@@ -26,14 +26,14 @@ if __name__ == '__main__':
             cmvId = cmv["id"]
 
             cmv["explicit_gender"] = explicit[cmvId] if cmvId in explicit else "UNK"
-            cmv["implicit_gender"] = implicit[cmvId] if cmvId in implicit else "UNK"
+            cmv["author_gender"] = implicit[cmvId] if cmvId in implicit else "UNK"
             cmv["topic"] = topics[cmvId]
                 
             for comment in cmv["comments"]:
                 cmvId = comment["id"]
 
                 comment["explicit_gender"] = explicit[cmvId] if cmvId in explicit else "UNK"
-                comment["implicit_gender"] = implicit[cmvId] if cmvId in implicit else "UNK"
+                comment["author_gender"] = implicit[cmvId] if cmvId in implicit else "UNK"
             
             json.dump(cmv, outFile)
             outFile.write("\n")
