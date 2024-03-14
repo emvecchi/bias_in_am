@@ -30,7 +30,7 @@ GENDERS = { "man" : "M",
 UNKNOWN = "UNK"
 THIRD_GENDER = "N"
 
-def selectBestGender(cmvId, text, matcher):
+def selectBestGender(text, matcher):
     genders = set([ ])
     for line in text.split("\n"):
         gender = matcher.findGender(line)
@@ -52,27 +52,6 @@ def selectBestGender(cmvId, text, matcher):
     else:
         return list(genders)[0]
 
-def annotateGenders(inFile, matcher, outThreads, outReplies, outAuthors):
-    for entry in inFile:
-        cmv = json.loads(entry)
-        cmvGender = selectBestGender(cmv["id"], cmv["selftext"], matcher)
-
-        outThreads.write(cmv["id"] + '\t' + cmvGender + "\n")
-
-        if cmvGender != UNKNOWN:
-            outAuthors.write(cmv["author"] + '\t' + cmvGender + "\n")
-
-        for comment in cmv["comments"]:
-            if "body" not in comment:
-                comGender = UNKNOWN
-            else:
-                comGender = selectBestGender(comment["id"], comment["body"], matcher)
-
-            outReplies.write(comment["id"] + '\t' + comGender + "\n")
-
-            if "author" in comment and comGender != UNKNOWN:
-                outAuthors.write(comment["author"] + '\t' + comGender + "\n")
-            
 if __name__ == '__main__':
     import os, sys
 

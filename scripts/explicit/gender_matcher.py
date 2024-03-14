@@ -1,14 +1,34 @@
 from lark import Lark, Transformer, Visitor
 import string, sys
+import lark
 
-class GenderExtractor(Transformer):
+def larkTreeToString(tree):
+    if isinstance(tree, lark.lexer.Token):
+        return str(tree)
+    elif isinstance(tree, lark.tree.Tree):
+        return " ".join([larkTreeToString(c) for c in tree.children])
+    elif isinstance(tree, list):
+        return " ".join([larkTreeToString(c) for c in tree])
+    else:
+        return None
     
+class GenderExtractor(Transformer):
+    def __init__(self):
+        self.identField = None
+                 
     def GENDER(self, token):
         self.gender = str(token)
         return token
     
     def intro(self, children):
         self.introv = [ str(token) for token in children ]
+        return children
+    
+    def identification(self, children):
+        if self.identField is not None:
+            print("More than one!", self.identField, larkTreeToString(children))
+            
+        self.identField = larkTreeToString(children)
         return children
     
     def findGender(self, tree):
@@ -22,6 +42,11 @@ class GenderExtractor(Transformer):
         self.transform(tree)
         return self.gender, self.introv
     
+    def findIdentification(self, tree):
+        self.identField = None
+        self.transform(tree)
+        return self.identField
+    
 class GenderMatcher():
     def __init__(self, dataDir):
         genders = self.__terminals(self.__readTerminals(dataDir + "/genders.txt"))
@@ -31,7 +56,7 @@ class GenderMatcher():
 
         self.lark = Lark(f'''start: not_important* identification not_important*
 
-            identification: EXPRESSION description GENDER | BEGINNING description? GENDER  description? ENDING SPACE
+            identification: EXPRESSION description GENDER SPACE | BEGINNING description? GENDER  description? ENDING SPACE
 
             GENDER: {genders}
             FEATURE: {features} | NUMBER | SPACE
@@ -67,23 +92,42 @@ class GenderMatcher():
     def findGender(self, text):
         text = self.__clearText(text)
         try:
-            tree = self.lark.parse(text)
-            extractor = GenderExtractor()
-            gender = extractor.findGender(tree)
-            return gender
+            tree = self.lark.parse(text + " ")
         except:
             return None
+        
+        extractor = GenderExtractor()
+        gender = extractor.findGender(tree)
+        return gender
+       
         
     def findOnlyGender(self, text):
         text = self.__clearText(text)
         try:
-            tree = self.glark.parse(text)
+            tree = self.glark.parse(text + " ")
             extractor = GenderExtractor()
             gender, intro = extractor.findGenderAndIntro(tree)
             return gender, intro
         except:
             return None, None
 
+    
+    def findIdentification(self, text):
+        text = self.__clearText(text)
+
+        try:    
+            tree = self.lark.parse(text + " ")
+        except:
+            return None
+        
+        extractor = GenderExtractor()
+        identification = extractor.findIdentification(tree)
+        return identification
+
+    def clearForHighlight(self, text):
+        text = self.__clearText(text)
+        return "".join(text.split())
+    
     def __readTerminals(self, filename):
         result = set([ ])
         for line in open(filename):
@@ -175,10 +219,5 @@ if __name__ == '__main__':
     import os, sys
 
     matcher = GenderMatcher("./data/")
-    runTests("./data/manual_tests.txt", matcher)
-    runTests("./data/tests.txt", matcher)
-    
-    #runOneTest(matcher, "Please help change my view because I never, never used to feel this way about ANYONE in the LBGT community and now I'm scared positively shitless of bisexual men...")
-    #parseOnlyGender(matcher, "./data/sentences_with_genders.txt")
-
-    #runOneGenderTest(matcher, "I am bla bla bla woman")
+    runTests("./tests/manual_tests.txt", matcher)
+    runTests("./tests/tests.txt", matcher)
