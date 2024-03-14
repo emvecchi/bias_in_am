@@ -1,21 +1,22 @@
-# bias_in_AM
+# Self-reported Demographics and Discourse Dynamics in a Persuasive Online Forum
 
-## requirements:
-* python version: 3.9
-* torch 1.13
-* scikit-learn 1.1.3
-* spacy 3.4.3
-* numpy 1.23.4
-* pandas 1.5.1
-* transformers 4.24.0
-* sklearn
-* statsmodels
-* lark
+This repository contains all the scripts and data used in the paper "Self-reported Demographics and Discourse Dynamics in a Persuasive Online Forum", accepted at LREC-COLING 2024 (https://lrec-coling-2024.org/)
+
+## Data
+
+- `data/lrec2024_data.csv` full data frame with all our features and annotations
+- `manual_annotations` explicit gender annotations provided by human annotators
+
+## Code
+
+- `scripts/analyze/analyze_stats.ipynb` frequency and topic analysis
+- `scripts/analyze/regression_analysis.Rmd` all the regression analysis
+- `scripts/explicit/highlight-genders.sh` heuristics for filtering and highlighting explicit gender mentioned. 
 
 ## References
 
 When using any of the data provided in this repository, please cite the following papers:
 
-* Agnieszka Falenska, Eva Maria Vecchi, and Gabriella Lapesa. *Under Review*. **Self-reported demographics and discourse dynamics in a persuasive online forum**. 
+* Agnieszka Falenska, Eva Maria Vecchi, and Gabriella Lapesa. LREC-COLING 2024. **Self-reported Demographics and Discourse Dynamics in a Persuasive Online Forum**. 
 * Chenhao Tan, Vlad Niculae, Cristian Danescu-Niculescu-Mizil, and Lillian Lee. 2016. **Winning arguments: Interaction dynamics and persuasion strategies in good-faith online discussions**. In Proceedings of the 25th International Conference on World Wide Web, WWW ’16, page 613–
 624, Republic and Canton of Geneva, CHE.
