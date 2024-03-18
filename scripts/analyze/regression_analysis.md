@@ -832,7 +832,7 @@ get_plot(stepAICmodelCMV, significant_featuresCMV, dependent_var, 'CMV Features'
 
 ![](regression_analysis_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
-### 2. extCMVGender ~ CMV Features + Textual Features
+### 2. score ~ CMV Features + Textual Features
 
 ``` r
 modelCombo <- lm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_ab, collapse = " + ")), data = combined_df)
