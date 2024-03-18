@@ -6,7 +6,7 @@ regression_analysis
 Preprocess gender_source,sentiment values
 
 ``` r
-data <- read.csv('../../data/lrec2024_data.csv')
+data <- read.csv('data/lrec2024_data.csv')
 
 # gender_source values: explicit mentions:1; extended gender:0
 data$gender_source <- ifelse(data$gender_source == 'explicit', 1.0, 0.0)
