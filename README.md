@@ -1,6 +1,6 @@
 # Self-reported Demographics and Discourse Dynamics in a Persuasive Online Forum
 
-This repository contains all the scripts and data used in the paper "Self-reported Demographics and Discourse Dynamics in a Persuasive Online Forum", accepted at LREC-COLING 2024 (https://lrec-coling-2024.org/)
+This repository contains all the scripts and data used in the paper "Self-reported Demographics and Discourse Dynamics in a Persuasive Online Forum", (Falenska, Vecchi, & Lapesa, LREC-COLING 2024).
 
 ## Data
 
@@ -17,6 +17,6 @@ This repository contains all the scripts and data used in the paper "Self-report
 
 When using any of the data provided in this repository, please cite the following papers:
 
-* Agnieszka Falenska, Eva Maria Vecchi, and Gabriella Lapesa. LREC-COLING 2024. **Self-reported Demographics and Discourse Dynamics in a Persuasive Online Forum**. 
+* Agnieszka Falenska, Eva Maria Vecchi, and Gabriella Lapesa. 2024. **Self-reported Demographics and Discourse Dynamics in a Persuasive Online Forum**. In *Proceedings of the International Language Resources and Evaluation (LREC-COLING-2024)*. Torino, Italy. 28-30 May 2024.
 * Chenhao Tan, Vlad Niculae, Cristian Danescu-Niculescu-Mizil, and Lillian Lee. 2016. **Winning arguments: Interaction dynamics and persuasion strategies in good-faith online discussions**. In Proceedings of the 25th International Conference on World Wide Web, WWW ’16, page 613–
 624, Republic and Canton of Geneva, CHE.
