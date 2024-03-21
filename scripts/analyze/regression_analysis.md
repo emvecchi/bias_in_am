@@ -501,7 +501,7 @@ filtered_column_names_ivs_ab <- c(filtered_column_names_ivs_a, colnames(ling_fea
 modelCMV <- glm(formula = paste(dependent_var, ' ~ ', 
               paste(filtered_column_names_ivs_a, collapse = " + "), '+ (score*num_comments)'), 
               data = cmv_features, family=binomial)
-stepAICmodelCMV <- suppressWarnings(glm(run_stepAIC_interaction(modelCMV), data = cmv_features, family=binomial))
+stepAICmodelCMV <- suppressWarnings(glm(run_stepAIC_interaction(modelCMV), data = cmv_features, family=binomial)
 summary(stepAICmodelCMV)
 ```
 
