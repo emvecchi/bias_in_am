@@ -536,11 +536,11 @@ summary(stepAICmodelCMV)
     ## score:extCMVGender_in_comments_m         .  
     ## num_comments:avg_comment_score           ** 
     ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
     ## 
     ## (Dispersion parameter for binomial family taken to be 1)
     ## 
-    ##     Null deviance: 2012.64  on 2339  degrees of freedom
+    ## Null deviance: 2012.64  on 2339  degrees of freedom
     ## Residual deviance:  840.68  on 2329  degrees of freedom
     ## AIC: 862.68
     ## 
@@ -551,7 +551,7 @@ pR2_CMV = 1 - stepAICmodelCMV$deviance / stepAICmodelCMV$null.deviance
 print(paste('Pseudo R2: ',pR2_CMV))
 ```
 
-    ## [1] "Pseudo R2:  0.582297052490703"
+    ## [1] "Pseudo R2:  0.5822971"
 
 ``` r
 fit <- get_explained_variance(stepAICmodelCMV, dependent_var)
@@ -724,63 +724,37 @@ summary(stepAICmodelCMV)
 
     ## 
     ## Call:
-    ## lm(formula = run_stepAIC_interaction(modelCMV), data = cmv_features)
+    ## lm(formula = run_stepAIC(modelCMV), data = cmv_features)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -586.50  -23.88   -1.37   14.25 1082.98 
+    ## -775.76  -31.05   -2.33   18.86 1153.32 
     ## 
     ## Coefficients:
     ##                                                Estimate Std. Error t value
-    ## (Intercept)                                  -100.90317    9.52442 -10.594
-    ## extCMVGender                                  -48.27249   14.60083  -3.306
-    ## num_comments                                    0.87351    0.03698  23.620
-    ## CMVGender_in_comments_m                       861.27211  343.84175   2.505
-    ## CMVGender_in_comments_f                      1004.91427  579.92350   1.733
-    ## extCMVGender_in_comments_m                    100.94041   22.76491   4.434
-    ## extCMVGender_in_comments_f                    185.50420   49.73693   3.730
-    ## avg_comment_score                              46.33698    3.26367  14.198
-    ## gender_source                                 -21.78840    6.67599  -3.264
-    ## num_comments:CMVGender_in_comments_m          -18.59266    2.04252  -9.103
-    ## extCMVGender_in_comments_m:avg_comment_score  -43.03104    9.30816  -4.623
-    ## num_comments:extCMVGender_in_comments_f        -0.57073    0.24994  -2.283
-    ## num_comments:extCMVGender_in_comments_m        -0.91275    0.13216  -6.906
-    ## CMVGender_in_comments_f:avg_comment_score    -431.79413  201.22059  -2.146
-    ## extCMVGender:avg_comment_score                 25.36646    4.77216   5.316
-    ## extCMVGender_in_comments_f:avg_comment_score  -92.36578   20.45492  -4.516
-    ## extCMVGender:num_comments                      -0.15794    0.04991  -3.164
-    ## CMVGender_in_comments_m:gender_source         488.67093  338.81106   1.442
-    ## CMVGender_in_comments_m:avg_comment_score    -257.85256  157.69616  -1.635
-    ## extCMVGender:CMVGender_in_comments_m          704.62572  467.67771   1.507
-    ## num_comments:gender_source                      0.06553    0.03947   1.660
+    ## (Intercept)                                   -47.10285    7.43519  -6.335 
+    ## extCMVGender                                   14.54619    7.50741   1.938
+    ## num_comments                                    0.52640    0.01407  37.400
+    ## CMVGender_in_comments_m                      -293.93485  159.12448  -1.847
+    ## extCMVGender_in_comments_m                    -46.65776   13.10777  -3.560
+    ## extCMVGender_in_comments_f                     -96.00709   23.85085  -4.025 
+    ## avg_comment_score                              32.68266    1.52713  21.401
+    ## gender_source                                 -19.95452    5.43835  -3.669
     ##                                              Pr(>|t|)    
-    ## (Intercept)                                   < 2e-16 ***
-    ## extCMVGender                                 0.000960 ***
+    ## (Intercept)                                   2.84e-10 ***
+    ## extCMVGender                                 0.052795 .
     ## num_comments                                  < 2e-16 ***
-    ## CMVGender_in_comments_m                      0.012318 *  
-    ## CMVGender_in_comments_f                      0.083257 .  
-    ## extCMVGender_in_comments_m                   9.68e-06 ***
-    ## extCMVGender_in_comments_f                   0.000196 ***
+    ## CMVGender_in_comments_m                      0.064845 .
+    ## extCMVGender_in_comments_m                   0.000379 ***
+    ## extCMVGender_in_comments_f                   5.87e-05 ***
     ## avg_comment_score                             < 2e-16 ***
-    ## gender_source                                0.001116 ** 
-    ## num_comments:CMVGender_in_comments_m          < 2e-16 ***
-    ## extCMVGender_in_comments_m:avg_comment_score 3.99e-06 ***
-    ## num_comments:extCMVGender_in_comments_f      0.022495 *  
-    ## num_comments:extCMVGender_in_comments_m      6.40e-12 ***
-    ## CMVGender_in_comments_f:avg_comment_score    0.031987 *  
-    ## extCMVGender:avg_comment_score               1.17e-07 ***
-    ## extCMVGender_in_comments_f:avg_comment_score 6.63e-06 ***
-    ## extCMVGender:num_comments                    0.001575 ** 
-    ## CMVGender_in_comments_m:gender_source        0.149350    
-    ## CMVGender_in_comments_m:avg_comment_score    0.102159    
-    ## extCMVGender:CMVGender_in_comments_m         0.132037    
-    ## num_comments:gender_source                   0.096952 .  
+    ## gender_source                                0.000249 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 86.71 on 2319 degrees of freedom
-    ## Multiple R-squared:  0.6456, Adjusted R-squared:  0.6425 
-    ## F-statistic: 211.2 on 20 and 2319 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 92.05 on 2332 degrees of freedom
+    ## Multiple R-squared:  0.5983,	Adjusted R-squared:  0.5971 
+    ## F-statistic: 496.2 on 7 and 2332 DF,  p-value: < 2.2e-16
 
 ``` r
 fit <- get_explained_variance(stepAICmodelCMV, dependent_var)
@@ -790,50 +764,14 @@ print(fit[order(fit$explvar, decreasing = TRUE),])
     ## Analysis of Variance Table
     ## 
     ## Response: score
-    ##                                                Df   Sum Sq  Mean Sq   F value
-    ## num_comments                                    1 24302384 24302384 3232.5361
-    ## Residuals                                    2319 17434369     7518          
-    ## avg_comment_score                               1  3828606  3828606  509.2549
-    ## num_comments:CMVGender_in_comments_m            1   988967   988967  131.5456
-    ## extCMVGender_in_comments_m                      1   768921   768921  102.2766
-    ## extCMVGender_in_comments_m:avg_comment_score    1   442863   442863   58.9066
-    ## extCMVGender_in_comments_f                      1   332504   332504   44.2274
-    ## num_comments:extCMVGender_in_comments_m         1   265695   265695   35.3409
-    ## num_comments:extCMVGender_in_comments_f         1   220130   220130   29.2802
-    ## extCMVGender_in_comments_f:avg_comment_score    1   122896   122896   16.3468
-    ## gender_source                                   1   104770   104770   13.9358
-    ## extCMVGender:num_comments                       1    73160    73160    9.7312
-    ## extCMVGender:avg_comment_score                  1    68209    68209    9.0727
-    ## CMVGender_in_comments_m                         1    67634    67634    8.9962
-    ## CMVGender_in_comments_f:avg_comment_score       1    63785    63785    8.4842
-    ## extCMVGender                                    1    25030    25030    3.3293
-    ## num_comments:gender_source                      1    20729    20729    2.7572
-    ## CMVGender_in_comments_m:gender_source           1    17760    17760    2.3623
-    ## extCMVGender:CMVGender_in_comments_m            1    16691    16691    2.2201
-    ## CMVGender_in_comments_m:avg_comment_score       1    14896    14896    1.9814
-    ## CMVGender_in_comments_f                         1    13089    13089    1.7410
-    ##                                                Pr(>F) explvar
-    ## num_comments                                 0.000000  49.402
-    ## Residuals                                              35.441
-    ## avg_comment_score                            0.000000   7.783
-    ## num_comments:CMVGender_in_comments_m         0.000000   2.010
-    ## extCMVGender_in_comments_m                   0.000000   1.563
-    ## extCMVGender_in_comments_m:avg_comment_score 0.000000   0.900
-    ## extCMVGender_in_comments_f                   0.000000   0.676
-    ## num_comments:extCMVGender_in_comments_m      0.000000   0.540
-    ## num_comments:extCMVGender_in_comments_f      0.000000   0.447
-    ## extCMVGender_in_comments_f:avg_comment_score 0.000054   0.250
-    ## gender_source                                0.000194   0.213
-    ## extCMVGender:num_comments                    0.001834   0.149
-    ## extCMVGender:avg_comment_score               0.002623   0.139
-    ## CMVGender_in_comments_m                      0.002734   0.137
-    ## CMVGender_in_comments_f:avg_comment_score    0.003617   0.130
-    ## extCMVGender                                 0.068186   0.051
-    ## num_comments:gender_source                   0.096952   0.042
-    ## CMVGender_in_comments_m:gender_source        0.124434   0.036
-    ## extCMVGender:CMVGender_in_comments_m         0.136362   0.034
-    ## CMVGender_in_comments_m:avg_comment_score    0.159380   0.030
-    ## CMVGender_in_comments_f                      0.187138   0.027
+    ##                              Df   Sum Sq  Mean Sq   F value   Pr(>F) explvar
+    ## num_comments                  1 24302384 24302384 2867.8742 0.000000  49.402
+    ## Residuals                  2332 19761382     8474                     40.171
+    ## avg_comment_score             1  3809966  3809966  449.6062 0.000000   7.745
+    ## extCMVGender_in_comments_f    1   351058   351058   41.4276 0.000000   0.714
+    ## gender_source                 1   114087   114087   13.4632 0.000249   0.232
+    ## CMVGender_in_comments_m       1    67634    67634    7.9814 0.004766   0.137
+    ## extCMVGender                  1    25030    25030    2.9537 0.085815   0.051
 
 ``` r
 significant_featuresCMV <- summary(stepAICmodelCMV)$coefficients[summary(stepAICmodelCMV)$coefficients[, 4] < 0.01, ]
