@@ -1,6 +1,17 @@
 regression_analysis
 ================
 
+``` r
+library(stats)
+library(corrplot)
+library(dplyr)
+library(MASS)
+library(sjmisc)
+library(sjPlot)  
+library(car)
+library(ggplot2)
+```
+
 ### Load Falenska et al. LREC-2024 Data for Analysis
 
 Preprocess gender_source,sentiment values
