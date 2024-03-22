@@ -1,23 +1,12 @@
 regression_analysis
 ================
 
-``` r
-library(stats)
-library(corrplot)
-library(dplyr)
-library(MASS)
-library(sjmisc)
-library(sjPlot)  
-library(car)
-library(ggplot2)
-```
-
-### Load Falenska et al. LREC-2024 Data for Analysis
+### Load LREC-2014 Data for Analysis
 
 Preprocess gender_source,sentiment values
 
 ``` r
-data <- read.csv('data/lrec2024_data.csv')
+data <- read.csv('../../data/lrec2024_data.csv')
 
 # gender_source values: explicit mentions:1; extended gender:0
 data$gender_source <- ifelse(data$gender_source == 'explicit', 1.0, 0.0)
@@ -136,10 +125,6 @@ data <- update_data_for_colinearity(clusters, cor_matrix_spearman, data)
     ## Cluster 63 :
     ## sentiment_neutral sentiment_negative sentiment
 
-
-
-## Full set of [cleaned] features for analysis in dataset
-
 ``` r
 colnames(data)
 ```
@@ -205,26 +190,9 @@ run_stepAIC_interaction <- function(model) {
 }
 ```
 
-### 2. Fit
+### 2. Plot
 
-- Retrieve table of explained variance
-
-``` r
-get_explained_variance <- function(model, dependent_var){
-       fit <- suppressWarnings(anova(model))
-       if (dependent_var %in% c('extCMVGender','CMVGender')) {
-              explained_variance <- (fit[["Deviance" ]]/deviance(model))*100
-       } else {
-              explained_variance <-(fit[["Sum Sq" ]]/sum(fit[["Sum Sq" ]]))*100
-       }
-       fit$explvar <- explained_variance
-       return(fit)
-}
-```
-
-### 3. Plot
-
-- Return plot *a-la* LREC-2024
+- Return plot a-la LREC-2024 format
 
 ``` r
 get_plot <- function(model, significant_features, dependent_var, iv_name){
@@ -246,7 +214,7 @@ get_plot <- function(model, significant_features, dependent_var, iv_name){
 }
 ```
 
-# DepVar: CMVGender
+# DV: CMVGender
 
 ``` r
 dependent_var <- 'CMVGender'
@@ -329,57 +297,12 @@ print(paste('Pseudo R2: ',pR2_CMV))
     ## [1] "Pseudo R2:  0.520758697316715"
 
 ``` r
-fit <- get_explained_variance(stepAICmodelCMV, dependent_var)
-print(fit[order(fit$explvar, decreasing = TRUE),])
-```
-
-    ## Analysis of Deviance Table
-    ## 
-    ## Model: binomial, link: logit
-    ## 
-    ## Response: CMVGender
-    ## 
-    ## Terms added sequentially (first to last)
-    ## 
-    ## 
-    ##                                                       Df Deviance Resid. Df
-    ## extCMVGender_in_comments_m                             1   89.686       342
-    ## extCMVGender_in_comments_f                             1   73.826       341
-    ## num_comments:CMVGender_in_comments_f                   1    6.188       334
-    ## CMVGender_in_comments_m:CMVGender_in_comments_f        1    6.105       338
-    ## CMVGender_in_comments_m:extCMVGender_in_comments_m     1    5.753       339
-    ## num_comments:extCMVGender_in_comments_f                1    4.109       335
-    ## extCMVGender_in_comments_f:avg_comment_score           1    3.856       337
-    ## num_comments:CMVGender_in_comments_m                   1    3.842       333
-    ## extCMVGender_in_comments_m:extCMVGender_in_comments_f  1    2.625       336
-    ## CMVGender_in_comments_f                                1    0.873       343
-    ## avg_comment_score                                      1    0.521       340
-    ## CMVGender_in_comments_m                                1    0.201       344
-    ## num_comments                                           1    0.028       345
-    ## NULL                                                                    346
-    ##                                                       Resid. Dev explvar
-    ## extCMVGender_in_comments_m                                288.68  49.316
-    ## extCMVGender_in_comments_f                                214.86  40.595
-    ## num_comments:CMVGender_in_comments_f                      185.70   3.403
-    ## CMVGender_in_comments_m:CMVGender_in_comments_f           202.48   3.357
-    ## CMVGender_in_comments_m:extCMVGender_in_comments_m        208.58   3.164
-    ## num_comments:extCMVGender_in_comments_f                   191.89   2.260
-    ## extCMVGender_in_comments_f:avg_comment_score              198.62   2.121
-    ## num_comments:CMVGender_in_comments_m                      181.86   2.112
-    ## extCMVGender_in_comments_m:extCMVGender_in_comments_f     196.00   1.443
-    ## CMVGender_in_comments_f                                   378.37   0.480
-    ## avg_comment_score                                         214.34   0.286
-    ## CMVGender_in_comments_m                                   379.24   0.110
-    ## num_comments                                              379.44   0.016
-    ## NULL                                                      379.47
-
-``` r
 significant_featuresCMV <- summary(stepAICmodelCMV)$coefficients[summary(stepAICmodelCMV)$coefficients[, 4] < 0.05, ]
 significant_featuresCMV <- significant_featuresCMV[!rownames(significant_featuresCMV) %in% rownames(significant_featuresCMV)[grep(":|\\*", rownames(significant_featuresCMV))], ]
 get_plot(stepAICmodelCMV, significant_featuresCMV, dependent_var, 'CMV Features')
 ```
 
-![](regression_analysis_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](regression_analysis_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ### 2. CMVGender ~ CMV Features + Textual Features
 
@@ -435,50 +358,13 @@ print(paste('Pseudo R2: ',pR2_Combo))
     ## [1] "Pseudo R2:  0.58014508927421"
 
 ``` r
-fit <- get_explained_variance(stepAICmodelCombo, dependent_var)
-print(fit[order(fit$explvar, decreasing = TRUE),])
-```
-
-    ## Analysis of Deviance Table
-    ## 
-    ## Model: binomial, link: logit
-    ## 
-    ## Response: CMVGender
-    ## 
-    ## Terms added sequentially (first to last)
-    ## 
-    ## 
-    ##                              Df Deviance Resid. Df Resid. Dev explvar
-    ## extCMVGender_in_comments_m    1   82.886       343     291.91  52.024
-    ## extCMVGender_in_comments_f    1   77.669       342     214.24  48.749
-    ## Lex_Decision_Accuracy         1   12.234       334     194.18   7.679
-    ## definite_article_perc         1    9.641       330     176.71   6.051
-    ## num_comments:score            1    7.346       326     159.32   4.611
-    ## Surprise_EmoLex               1    5.590       331     186.35   3.509
-    ## toxicity_toxic                1    5.200       328     170.05   3.264
-    ## score                         1    4.646       344     374.80   2.916
-    ## sentiment                     1    3.377       327     166.67   2.120
-    ## certainty_component           1    2.470       336     207.41   1.550
-    ## past_tense                    1    2.382       337     209.88   1.495
-    ## objects_component             1    1.549       333     192.63   0.972
-    ## edited                        1    1.466       329     175.25   0.920
-    ## COCA_spoken_Bigram_Frequency  1    0.994       335     206.41   0.624
-    ## named_entities                1    0.956       339     213.11   0.600
-    ## trust_verbs_component         1    0.849       338     212.26   0.533
-    ## Anger_EmoLex                  1    0.685       332     191.94   0.430
-    ## auxiliary                     1    0.180       340     214.06   0.113
-    ## num_comments                  1    0.028       345     379.44   0.018
-    ## avg_comment_score             1    0.000       341     214.24   0.000
-    ## NULL                                           346     379.47
-
-``` r
 significant_featuresCombo <- summary(stepAICmodelCombo)$coefficients[summary(stepAICmodelCombo)$coefficients[, 4] < 0.05, ]
 get_plot(stepAICmodelCombo, significant_featuresCombo, dependent_var, 'CMV & Textual Features')
 ```
 
-![](regression_analysis_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](regression_analysis_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
-# DepVar: extCMVGender
+# DV: extCMVGender
 
 ``` r
 dependent_var <- 'extCMVGender' 
@@ -501,7 +387,7 @@ filtered_column_names_ivs_ab <- c(filtered_column_names_ivs_a, colnames(ling_fea
 modelCMV <- glm(formula = paste(dependent_var, ' ~ ', 
               paste(filtered_column_names_ivs_a, collapse = " + "), '+ (score*num_comments)'), 
               data = cmv_features, family=binomial)
-stepAICmodelCMV <- suppressWarnings(glm(run_stepAIC_interaction(modelCMV), data = cmv_features, family=binomial)
+stepAICmodelCMV <- suppressWarnings(glm(run_stepAIC_interaction(modelCMV), data = cmv_features, family=binomial))
 summary(stepAICmodelCMV)
 ```
 
@@ -536,11 +422,11 @@ summary(stepAICmodelCMV)
     ## score:extCMVGender_in_comments_m         .  
     ## num_comments:avg_comment_score           ** 
     ## ---
-    ## Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
     ## (Dispersion parameter for binomial family taken to be 1)
     ## 
-    ## Null deviance: 2012.64  on 2339  degrees of freedom
+    ##     Null deviance: 2012.64  on 2339  degrees of freedom
     ## Residual deviance:  840.68  on 2329  degrees of freedom
     ## AIC: 862.68
     ## 
@@ -551,53 +437,14 @@ pR2_CMV = 1 - stepAICmodelCMV$deviance / stepAICmodelCMV$null.deviance
 print(paste('Pseudo R2: ',pR2_CMV))
 ```
 
-    ## [1] "Pseudo R2:  0.5822971"
-
-``` r
-fit <- get_explained_variance(stepAICmodelCMV, dependent_var)
-print(fit[order(fit$explvar, decreasing = TRUE),])
-```
-
-    ## Analysis of Deviance Table
-    ## 
-    ## Model: binomial, link: logit
-    ## 
-    ## Response: extCMVGender
-    ## 
-    ## Terms added sequentially (first to last)
-    ## 
-    ## 
-    ##                                          Df Deviance Resid. Df Resid. Dev
-    ## extCMVGender_in_comments_f                1   603.66      2335     867.89
-    ## extCMVGender_in_comments_m                1   539.92      2336    1471.55
-    ## num_comments:avg_comment_score            1     8.44      2329     840.68
-    ## score:extCMVGender_in_comments_f          1     7.53      2332     856.85
-    ## extCMVGender_in_comments_f:gender_source  1     5.10      2331     851.75
-    ## gender_source                             1     3.41      2333     864.38
-    ## score:extCMVGender_in_comments_m          1     2.63      2330     849.12
-    ## num_comments                              1     0.83      2338    2011.81
-    ## score                                     1     0.34      2337    2011.46
-    ## avg_comment_score                         1     0.10      2334     867.79
-    ## NULL                                                      2339    2012.64
-    ##                                          explvar
-    ## extCMVGender_in_comments_f                71.806
-    ## extCMVGender_in_comments_m                64.223
-    ## num_comments:avg_comment_score             1.003
-    ## score:extCMVGender_in_comments_f           0.896
-    ## extCMVGender_in_comments_f:gender_source   0.607
-    ## gender_source                              0.406
-    ## score:extCMVGender_in_comments_m           0.312
-    ## num_comments                               0.099
-    ## score                                      0.041
-    ## avg_comment_score                          0.012
-    ## NULL
+    ## [1] "Pseudo R2:  0.582297052490703"
 
 ``` r
 significant_featuresCMV <- summary(stepAICmodelCMV)$coefficients[summary(stepAICmodelCMV)$coefficients[, 4] < 0.01, ]
 get_plot(stepAICmodelCMV, significant_featuresCMV, dependent_var, 'CMV Features')
 ```
 
-![](regression_analysis_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](regression_analysis_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ### 2. extCMVGender ~ CMV Features + Textual Features
 
@@ -653,50 +500,13 @@ print(paste('Pseudo R2: ',pR2_Combo))
     ## [1] "Pseudo R2:  0.611188393485342"
 
 ``` r
-fit <- get_explained_variance(stepAICmodelCombo, dependent_var)
-print(fit[order(fit$explvar, decreasing = TRUE),])
-```
-
-    ## Analysis of Deviance Table
-    ## 
-    ## Model: binomial, link: logit
-    ## 
-    ## Response: extCMVGender
-    ## 
-    ## Terms added sequentially (first to last)
-    ## 
-    ## 
-    ##                            Df Deviance Resid. Df Resid. Dev explvar
-    ## extCMVGender_in_comments_f  1   603.66      2335     867.89  77.141
-    ## extCMVGender_in_comments_m  1   539.92      2336    1471.55  68.996
-    ## hypernomy_verb_noun         1    11.33      2325     815.85   1.448
-    ## trust_verbs_component       1    11.14      2330     847.74   1.424
-    ## toxicity_toxic              1    10.86      2320     790.55   1.388
-    ## certainty_component         1    10.10      2326     827.18   1.291
-    ## num_comments:score          1     8.01      2319     782.54   1.023
-    ## Lex_Decision_Accuracy       1     5.59      2324     810.26   0.714
-    ## num_question                1     5.21      2321     801.41   0.666
-    ## positive_verbs_component    1     4.77      2327     837.28   0.609
-    ## economy_component           1     4.45      2329     843.29   0.568
-    ## failure_component           1     3.98      2332     860.39   0.509
-    ## gender_source               1     3.41      2333     864.38   0.436
-    ## Dominance                   1     2.54      2322     806.62   0.325
-    ## well_being_component        1     1.51      2331     858.88   0.193
-    ## polarity_verbs_component    1     1.25      2328     842.05   0.159
-    ## Gunning_Fog_simplicity      1     1.09      2323     809.16   0.140
-    ## num_comments                1     0.83      2338    2011.81   0.106
-    ## score                       1     0.34      2337    2011.46   0.044
-    ## avg_comment_score           1     0.10      2334     867.79   0.013
-    ## NULL                                        2339    2012.64
-
-``` r
 significant_featuresCombo <- summary(stepAICmodelCombo)$coefficients[summary(stepAICmodelCombo)$coefficients[, 4] < 0.05, ]
 get_plot(stepAICmodelCombo, significant_featuresCombo, dependent_var, 'CMV & Textual Features')
 ```
 
-![](regression_analysis_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](regression_analysis_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
-# DepVar: score
+# DV: score
 
 ``` r
 dependent_var <- 'score' 
@@ -724,54 +534,63 @@ summary(stepAICmodelCMV)
 
     ## 
     ## Call:
-    ## lm(formula = run_stepAIC(modelCMV), data = cmv_features)
+    ## lm(formula = run_stepAIC_interaction(modelCMV), data = cmv_features)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -775.76  -31.05   -2.33   18.86 1153.32 
+    ## -586.50  -23.88   -1.37   14.25 1082.98 
     ## 
     ## Coefficients:
     ##                                                Estimate Std. Error t value
-    ## (Intercept)                                   -47.10285    7.43519  -6.335 
-    ## extCMVGender                                   14.54619    7.50741   1.938
-    ## num_comments                                    0.52640    0.01407  37.400
-    ## CMVGender_in_comments_m                      -293.93485  159.12448  -1.847
-    ## extCMVGender_in_comments_m                    -46.65776   13.10777  -3.560
-    ## extCMVGender_in_comments_f                     -96.00709   23.85085  -4.025 
-    ## avg_comment_score                              32.68266    1.52713  21.401
-    ## gender_source                                 -19.95452    5.43835  -3.669
+    ## (Intercept)                                  -100.90317    9.52442 -10.594
+    ## extCMVGender                                  -48.27249   14.60083  -3.306
+    ## num_comments                                    0.87351    0.03698  23.620
+    ## CMVGender_in_comments_m                       861.27211  343.84175   2.505
+    ## CMVGender_in_comments_f                      1004.91427  579.92350   1.733
+    ## extCMVGender_in_comments_m                    100.94041   22.76491   4.434
+    ## extCMVGender_in_comments_f                    185.50420   49.73693   3.730
+    ## avg_comment_score                              46.33698    3.26367  14.198
+    ## gender_source                                 -21.78840    6.67599  -3.264
+    ## num_comments:CMVGender_in_comments_m          -18.59266    2.04252  -9.103
+    ## extCMVGender_in_comments_m:avg_comment_score  -43.03104    9.30816  -4.623
+    ## num_comments:extCMVGender_in_comments_f        -0.57073    0.24994  -2.283
+    ## num_comments:extCMVGender_in_comments_m        -0.91275    0.13216  -6.906
+    ## CMVGender_in_comments_f:avg_comment_score    -431.79413  201.22059  -2.146
+    ## extCMVGender:avg_comment_score                 25.36646    4.77216   5.316
+    ## extCMVGender_in_comments_f:avg_comment_score  -92.36578   20.45492  -4.516
+    ## extCMVGender:num_comments                      -0.15794    0.04991  -3.164
+    ## CMVGender_in_comments_m:gender_source         488.67093  338.81106   1.442
+    ## CMVGender_in_comments_m:avg_comment_score    -257.85256  157.69616  -1.635
+    ## extCMVGender:CMVGender_in_comments_m          704.62572  467.67771   1.507
+    ## num_comments:gender_source                      0.06553    0.03947   1.660
     ##                                              Pr(>|t|)    
-    ## (Intercept)                                   2.84e-10 ***
-    ## extCMVGender                                 0.052795 .
+    ## (Intercept)                                   < 2e-16 ***
+    ## extCMVGender                                 0.000960 ***
     ## num_comments                                  < 2e-16 ***
-    ## CMVGender_in_comments_m                      0.064845 .
-    ## extCMVGender_in_comments_m                   0.000379 ***
-    ## extCMVGender_in_comments_f                   5.87e-05 ***
+    ## CMVGender_in_comments_m                      0.012318 *  
+    ## CMVGender_in_comments_f                      0.083257 .  
+    ## extCMVGender_in_comments_m                   9.68e-06 ***
+    ## extCMVGender_in_comments_f                   0.000196 ***
     ## avg_comment_score                             < 2e-16 ***
-    ## gender_source                                0.000249 ***
+    ## gender_source                                0.001116 ** 
+    ## num_comments:CMVGender_in_comments_m          < 2e-16 ***
+    ## extCMVGender_in_comments_m:avg_comment_score 3.99e-06 ***
+    ## num_comments:extCMVGender_in_comments_f      0.022495 *  
+    ## num_comments:extCMVGender_in_comments_m      6.40e-12 ***
+    ## CMVGender_in_comments_f:avg_comment_score    0.031987 *  
+    ## extCMVGender:avg_comment_score               1.17e-07 ***
+    ## extCMVGender_in_comments_f:avg_comment_score 6.63e-06 ***
+    ## extCMVGender:num_comments                    0.001575 ** 
+    ## CMVGender_in_comments_m:gender_source        0.149350    
+    ## CMVGender_in_comments_m:avg_comment_score    0.102159    
+    ## extCMVGender:CMVGender_in_comments_m         0.132037    
+    ## num_comments:gender_source                   0.096952 .  
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 92.05 on 2332 degrees of freedom
-    ## Multiple R-squared:  0.5983,	Adjusted R-squared:  0.5971 
-    ## F-statistic: 496.2 on 7 and 2332 DF,  p-value: < 2.2e-16
-
-``` r
-fit <- get_explained_variance(stepAICmodelCMV, dependent_var)
-print(fit[order(fit$explvar, decreasing = TRUE),])
-```
-
-    ## Analysis of Variance Table
-    ## 
-    ## Response: score
-    ##                              Df   Sum Sq  Mean Sq   F value   Pr(>F) explvar
-    ## num_comments                  1 24302384 24302384 2867.8742 0.000000  49.402
-    ## Residuals                  2332 19761382     8474                     40.171
-    ## avg_comment_score             1  3809966  3809966  449.6062 0.000000   7.745
-    ## extCMVGender_in_comments_f    1   351058   351058   41.4276 0.000000   0.714
-    ## gender_source                 1   114087   114087   13.4632 0.000249   0.232
-    ## CMVGender_in_comments_m       1    67634    67634    7.9814 0.004766   0.137
-    ## extCMVGender                  1    25030    25030    2.9537 0.085815   0.051
+    ## Residual standard error: 86.71 on 2319 degrees of freedom
+    ## Multiple R-squared:  0.6456, Adjusted R-squared:  0.6425 
+    ## F-statistic: 211.2 on 20 and 2319 DF,  p-value: < 2.2e-16
 
 ``` r
 significant_featuresCMV <- summary(stepAICmodelCMV)$coefficients[summary(stepAICmodelCMV)$coefficients[, 4] < 0.01, ]
@@ -779,9 +598,9 @@ significant_featuresCMV <- significant_featuresCMV[!rownames(significant_feature
 get_plot(stepAICmodelCMV, significant_featuresCMV, dependent_var, 'CMV Features')
 ```
 
-![](regression_analysis_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](regression_analysis_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
-### 2. score ~ CMV Features + Textual Features
+### 2. extCMVGender ~ CMV Features + Textual Features
 
 ``` r
 modelCombo <- lm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_ab, collapse = " + ")), data = combined_df)
@@ -828,61 +647,8 @@ summary(stepAICmodelCombo)
     ## F-statistic: 180.3 on 20 and 2319 DF,  p-value: < 2.2e-16
 
 ``` r
-fit <- get_explained_variance(stepAICmodelCombo, dependent_var)
-print(fit[order(fit$explvar, decreasing = TRUE),])
-```
-
-    ## Analysis of Variance Table
-    ## 
-    ## Response: score
-    ##                                       Df   Sum Sq  Mean Sq   F value   Pr(>F)
-    ## num_comments                           1 24302384 24302384 2926.6336 0.000000
-    ## Residuals                           2319 19256674     8304                   
-    ## avg_comment_score                      1  3787547  3787547  456.1183 0.000000
-    ## extCMVGender_in_comments_m             1   795338   795338   95.7792 0.000000
-    ## extCMVGender_in_comments_f             1   364216   364216   43.8610 0.000000
-    ## gender_source                          1   128276   128276   15.4478 0.000087
-    ## named_entities                         1    88343    88343   10.6388 0.001123
-    ## affect_friends_and_family_component    1    75233    75233    9.0600 0.002641
-    ## nwords                                 1    72133    72133    8.6867 0.003237
-    ## Surprise_EmoLex                        1    48696    48696    5.8642 0.015528
-    ## COCA_spoken_Frequency_AW               1    41923    41923    5.0486 0.024740
-    ## lsa_average_top_three_cosine           1    40459    40459    4.8723 0.027389
-    ## hedge_words_perc                       1    28789    28789    3.4670 0.062733
-    ## hu_liu_pos_nwords                      1    27638    27638    3.3284 0.068224
-    ## extCMVGender                           1    25030    25030    3.0142 0.082671
-    ## avg_comment_sentiment                  1    22654    22654    2.7281 0.098729
-    ## KL_divergence_rel_entropy              1    22395    22395    2.6969 0.100676
-    ## Dominance                              1    21440    21440    2.5819 0.108226
-    ## All_AWL_Normed                         1    19394    19394    2.3355 0.126591
-    ## positive_nouns_component               1    14157    14157    1.7049 0.191783
-    ## mattr50_aw                             1    10368    10368    1.2486 0.263940
-    ##                                     explvar
-    ## num_comments                         49.402
-    ## Residuals                            39.145
-    ## avg_comment_score                     7.699
-    ## extCMVGender_in_comments_m            1.617
-    ## extCMVGender_in_comments_f            0.740
-    ## gender_source                         0.261
-    ## named_entities                        0.180
-    ## affect_friends_and_family_component   0.153
-    ## nwords                                0.147
-    ## Surprise_EmoLex                       0.099
-    ## COCA_spoken_Frequency_AW              0.085
-    ## lsa_average_top_three_cosine          0.082
-    ## hedge_words_perc                      0.059
-    ## hu_liu_pos_nwords                     0.056
-    ## extCMVGender                          0.051
-    ## avg_comment_sentiment                 0.046
-    ## KL_divergence_rel_entropy             0.046
-    ## Dominance                             0.044
-    ## All_AWL_Normed                        0.039
-    ## positive_nouns_component              0.029
-    ## mattr50_aw                            0.021
-
-``` r
 significant_featuresCombo <- summary(stepAICmodelCombo)$coefficients[summary(stepAICmodelCombo)$coefficients[, 4] < 0.05, ]
 get_plot(stepAICmodelCombo, significant_featuresCombo, dependent_var, 'CMV & Textual Features')
 ```
 
-![](regression_analysis_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](regression_analysis_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
