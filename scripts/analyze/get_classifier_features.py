@@ -11,7 +11,7 @@ from functions import *
 
 # Get features from automatic classifiers (toxicity, sentiment, emotion)
 
-datafile = '/mount/arbeitsdaten14/projekte/sfb-732/d8/falensaa/BiasInArguments/intermediate-data/tal_elal_2016/train_period_data.annotations-ver2.masked.topics.jsonlist'
+datafile = '../../data/cmv.annotations.topics.jsonlist'
 with open(datafile, 'r') as f:
 	data = [json.loads(line) for line in f]
 
