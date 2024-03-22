@@ -131,24 +131,7 @@ run_stepAIC_interaction <- function(model) {
 }
 ```
 
-### 2. Fit
-
--   Retrieve explained variance table
-
-```{r}
-get_explained_variance <- function(model, dependent_var){
-       fit <- suppressWarnings(anova(model))
-       if (dependent_var %in% c('extCMVGender','CMVGender')) {
-              explained_variance <- (fit[["Deviance" ]]/deviance(model))*100
-       } else {
-              explained_variance <-(fit[["Sum Sq" ]]/sum(fit[["Sum Sq" ]]))*100
-       }
-       fit$explvar <- explained_variance
-       return(fit)
-}
-```
-
-### 3. Plot
+### 2. Plot
 
 -   Return plot a-la LREC-2024 format
 
@@ -200,8 +183,6 @@ stepAICmodelCMV <- suppressWarnings(glm(run_stepAIC_interaction(modelCMV), data 
 summary(stepAICmodelCMV)
 pR2_CMV = 1 - stepAICmodelCMV$deviance / stepAICmodelCMV$null.deviance 
 print(paste('Pseudo R2: ',pR2_CMV))
-fit <- get_explained_variance(stepAICmodelCMV, dependent_var)
-print(fit[order(fit$explvar, decreasing = TRUE),])
 significant_featuresCMV <- summary(stepAICmodelCMV)$coefficients[summary(stepAICmodelCMV)$coefficients[, 4] < 0.05, ]
 significant_featuresCMV <- significant_featuresCMV[!rownames(significant_featuresCMV) %in% rownames(significant_featuresCMV)[grep(":|\\*", rownames(significant_featuresCMV))], ]
 get_plot(stepAICmodelCMV, significant_featuresCMV, dependent_var, 'CMV Features')
@@ -215,8 +196,6 @@ stepAICmodelCombo <- glm(run_stepAIC(modelCombo), data = combined_df, family=bin
 summary(stepAICmodelCombo)
 pR2_Combo = 1 - stepAICmodelCombo$deviance / stepAICmodelCombo$null.deviance 
 print(paste('Pseudo R2: ',pR2_Combo))
-fit <- get_explained_variance(stepAICmodelCombo, dependent_var)
-print(fit[order(fit$explvar, decreasing = TRUE),])
 significant_featuresCombo <- summary(stepAICmodelCombo)$coefficients[summary(stepAICmodelCombo)$coefficients[, 4] < 0.05, ]
 get_plot(stepAICmodelCombo, significant_featuresCombo, dependent_var, 'CMV & Textual Features')
 ```
@@ -248,8 +227,6 @@ stepAICmodelCMV <- suppressWarnings(glm(run_stepAIC_interaction(modelCMV), data 
 summary(stepAICmodelCMV)
 pR2_CMV = 1 - stepAICmodelCMV$deviance / stepAICmodelCMV$null.deviance 
 print(paste('Pseudo R2: ',pR2_CMV))
-fit <- get_explained_variance(stepAICmodelCMV, dependent_var)
-print(fit[order(fit$explvar, decreasing = TRUE),])
 significant_featuresCMV <- summary(stepAICmodelCMV)$coefficients[summary(stepAICmodelCMV)$coefficients[, 4] < 0.01, ]
 get_plot(stepAICmodelCMV, significant_featuresCMV, dependent_var, 'CMV Features')
 ```
@@ -262,8 +239,6 @@ stepAICmodelCombo <- glm(run_stepAIC(modelCombo), data = combined_df, family=bin
 summary(stepAICmodelCombo)
 pR2_Combo = 1 - stepAICmodelCombo$deviance / stepAICmodelCombo$null.deviance 
 print(paste('Pseudo R2: ',pR2_Combo))
-fit <- get_explained_variance(stepAICmodelCombo, dependent_var)
-print(fit[order(fit$explvar, decreasing = TRUE),])
 significant_featuresCombo <- summary(stepAICmodelCombo)$coefficients[summary(stepAICmodelCombo)$coefficients[, 4] < 0.05, ]
 get_plot(stepAICmodelCombo, significant_featuresCombo, dependent_var, 'CMV & Textual Features')
 ```
@@ -292,8 +267,6 @@ modelCMV <- lm(formula = paste(dependent_var, ' ~ ',
               data = cmv_features)
 stepAICmodelCMV <- suppressWarnings(lm(run_stepAIC_interaction(modelCMV), data = cmv_features))
 summary(stepAICmodelCMV)
-fit <- get_explained_variance(stepAICmodelCMV, dependent_var)
-print(fit[order(fit$explvar, decreasing = TRUE),])
 significant_featuresCMV <- summary(stepAICmodelCMV)$coefficients[summary(stepAICmodelCMV)$coefficients[, 4] < 0.01, ]
 significant_featuresCMV <- significant_featuresCMV[!rownames(significant_featuresCMV) %in% rownames(significant_featuresCMV)[grep(":|\\*", rownames(significant_featuresCMV))], ]
 get_plot(stepAICmodelCMV, significant_featuresCMV, dependent_var, 'CMV Features')
@@ -305,8 +278,6 @@ get_plot(stepAICmodelCMV, significant_featuresCMV, dependent_var, 'CMV Features'
 modelCombo <- lm(formula = paste(dependent_var, ' ~ ', paste(filtered_column_names_ivs_ab, collapse = " + ")), data = combined_df)
 stepAICmodelCombo <- lm(run_stepAIC(modelCombo), data = combined_df)
 summary(stepAICmodelCombo)
-fit <- get_explained_variance(stepAICmodelCombo, dependent_var)
-print(fit[order(fit$explvar, decreasing = TRUE),])
 significant_featuresCombo <- summary(stepAICmodelCombo)$coefficients[summary(stepAICmodelCombo)$coefficients[, 4] < 0.05, ]
 get_plot(stepAICmodelCombo, significant_featuresCombo, dependent_var, 'CMV & Textual Features')
 ```
